@@ -26,21 +26,21 @@ export async function generateMetadata({
   }
 }
 
-// Transformador de URLs (Spotify, YouTube, Instagram)
-function renderEmbeddedMedia(href: string) {
-  if (!href) return null
-  const cleanHref = href.trim()
+// Renderizador uniforme de reproductores de media (Spotify, YouTube e Instagram)
+function renderEmbeddedMedia(url: string) {
+  if (!url) return null
+  const cleanUrl = url.trim()
 
-  // Spotify Embed (track, album, playlist, episode, show, intl-xx)
-  const spMatch = cleanHref.match(
+  // 1. Spotify Embed
+  const spMatch = cleanUrl.match(
     /(?:https?:\/\/)?(?:open\.)?spotify\.com\/(?:[a-zA-Z]{2}(?:-[a-zA-Z]{2})?\/)?(track|album|playlist|episode|show)\/([a-zA-Z0-9]+)/
   )
   if (spMatch && spMatch[1] && spMatch[2]) {
     const type = spMatch[1]
     const id = spMatch[2]
     return (
-      <span className="my-8 block w-full">
-        <span className="block overflow-hidden rounded-lg border-2 border-punk-pink shadow-lg">
+      <div className="my-8 w-full clear-both">
+        <div className="overflow-hidden rounded-lg border-2 border-punk-pink shadow-lg">
           <iframe
             title="Reproductor de Spotify"
             src={`https://open.spotify.com/embed/${type}/${id}?utm_source=generator`}
@@ -50,19 +50,19 @@ function renderEmbeddedMedia(href: string) {
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
             className="block border-0"
           />
-        </span>
-      </span>
+        </div>
+      </div>
     )
   }
 
-  // YouTube Embed
-  const ytMatch = cleanHref.match(
+  // 2. YouTube Embed
+  const ytMatch = cleanUrl.match(
     /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
   )
   if (ytMatch && ytMatch[1]) {
     return (
-      <span className="my-8 block w-full">
-        <span className="relative block aspect-video w-full overflow-hidden border-2 border-punk-yellow">
+      <div className="my-8 w-full clear-both">
+        <div className="relative aspect-video w-full overflow-hidden border-2 border-punk-yellow">
           <iframe
             title="Reproductor de YouTube"
             src={`https://www.youtube.com/embed/${ytMatch[1]}`}
@@ -71,19 +71,19 @@ function renderEmbeddedMedia(href: string) {
             allowFullScreen
             className="absolute inset-0 size-full border-0"
           />
-        </span>
-      </span>
+        </div>
+      </div>
     )
   }
 
-  // Instagram Embed
-  const igMatch = cleanHref.match(
+  // 3. Instagram Embed
+  const igMatch = cleanUrl.match(
     /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:p|reel)\/([a-zA-Z0-9_-]+)/
   )
   if (igMatch && igMatch[1]) {
     return (
-      <span className="my-8 block w-full">
-        <span className="relative block aspect-[4/5] max-w-md mx-auto overflow-hidden border-2 border-punk-cream/20">
+      <div className="my-8 w-full clear-both">
+        <div className="relative aspect-[4/5] max-w-md mx-auto overflow-hidden border-2 border-punk-cream/20">
           <iframe
             title="Publicación de Instagram"
             src={`https://www.instagram.com/p/${igMatch[1]}/embed`}
@@ -91,8 +91,8 @@ function renderEmbeddedMedia(href: string) {
             allowFullScreen
             className="absolute inset-0 size-full border-0"
           />
-        </span>
-      </span>
+        </div>
+      </div>
     )
   }
 
@@ -166,13 +166,13 @@ export default async function ArticlePage({
           {article.body.map((para, i) => {
             const trimmed = para.trim()
 
-            // 1. Si el texto del párrafo contiene o es una URL directa de Spotify, YouTube o Instagram
+            // 1. Detectar si el bloque completo es una URL de Spotify, YouTube o Instagram
             const mediaEmbed = renderEmbeddedMedia(trimmed)
             if (mediaEmbed) {
               return <div key={i}>{mediaEmbed}</div>
             }
 
-            // 2. Si trae un iframe directo o bloques HTML del editor (galerías, etc)
+            // 2. Si el bloque trae un iframe directo o HTML del editor
             const isHTML = trimmed.startsWith('<') && trimmed.endsWith('>')
             if (isHTML || trimmed.includes('<iframe')) {
               return (
@@ -184,7 +184,7 @@ export default async function ArticlePage({
               )
             }
 
-            // 3. Formato Markdown normal
+            // 3. Párrafo estándar con Markdown
             return (
               <div
                 key={i}
@@ -261,7 +261,7 @@ export default async function ArticlePage({
           })}
         </div>
 
-        {/* Galería adicional opcional */}
+        {/* Galería opcional */}
         {article.gallery && article.gallery.length > 0 && (
           <div className="mb-4 mt-12">
             <h2 className="mb-4 font-display text-2xl uppercase tracking-tight text-punk-cream">
