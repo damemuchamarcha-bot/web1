@@ -41,4 +41,6 @@ Este disco ha tenido 3 videoclips. En “I Wanna Be Your Dog Again” aparece ca
 
 Duckwrth ha decidido hacernos descubrir el otro lado de la cinta y darnos otra versión de un disco. Ocho canciones después, el álbum sigue explorando distintas atmósferas y subgéneros con total libertad.
 
+<https://www.instagram.com/p/DVIvF2VDVP6/?utm_source=ig_web_button_share_sheet>
+
 Queremos destacar la nominación en la 67.ª edición de los Premios Grammy en la categoría de Best Immersive Audio Album por su aclamado proyecto conceptual *All American F—Boy*. Aunque el trofeo y el reconocimiento técnico de esta categoría corresponden directamente al ingeniero de mezcla inmersiva Andrew Law por adaptar las pistas originales al formato Dolby Atmos, Duckwrth celebró este logro como una auténtica manifestación, ya que durante las sesiones de grabación en el estudio solía bromear con sus amigos tocando un "botón invisible de los Grammy" cada vez que finalizaban una canción.
