@@ -8,7 +8,7 @@ backend:
 media_library:
   name: uploadcare
   config:
-    publicKey: "demopublickey"
+    publicKey: "0c8ace87549de321b182"
     tabs: "file url camera gdrive"
     effects: "crop,rotate"
     settings:
