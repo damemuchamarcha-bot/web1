@@ -31,33 +31,32 @@ function renderEmbeddedMedia(url: string) {
   if (!url) return null
   const cleanUrl = url.trim()
 
-  // Detecta URLs de Spotify (canción, álbum, lista, etc., incluyendo URLs con idioma como /intl-es/)
-  const spMatch = cleanUrl.match(
-    /(?:https?:\/\/)?(?:open\.)?spotify\.com\/(?:[a-zA-Z]{2}(?:-[a-zA-Z]{2})?\/)?(track|album|playlist|episode|show)\/([a-zA-Z0-9]+)/
-  )
-  if (spMatch && spMatch[1] && spMatch[2]) {
-    const type = spMatch[1]
-    const id = spMatch[2]
-    const embedUrl = `https://open.spotify.com/embed/${type}/${id}`
-
-    return (
-      <div className="my-8 w-full clear-both">
-        <div className="overflow-hidden rounded-lg border-2 border-punk-pink bg-punk-black/80 shadow-lg min-h-[152px]">
-          <iframe
-            title="Reproductor de Spotify"
-            src={embedUrl}
-            width="100%"
-            height={type === 'track' ? '152' : '352'}
-            loading="lazy"
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            className="block w-full border-0"
-          />
+  // 1. Detectar Spotify con cualquier variación de URL (parámetros, idiomas, etc.)
+  const isSpotify = cleanUrl.includes('spotify.com') || cleanUrl.includes('spotify.link')
+  if (isSpotify) {
+    const spMatch = cleanUrl.match(/(track|album|playlist|episode|show)\/([a-zA-Z0-9]+)/)
+    if (spMatch && spMatch[1] && spMatch[2]) {
+      const type = spMatch[1]
+      const id = spMatch[2]
+      return (
+        <div className="my-8 w-full clear-both">
+          <div className="overflow-hidden rounded-lg border-2 border-punk-pink bg-punk-black shadow-lg">
+            <iframe
+              title="Reproductor de Spotify"
+              src={`https://open.spotify.com/embed/${type}/${id}?utm_source=generator&theme=0`}
+              width="100%"
+              height={type === 'track' ? '152' : '352'}
+              loading="lazy"
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              className="block w-full border-0"
+            />
+          </div>
         </div>
-      </div>
-    )
+      )
+    }
   }
 
-  // Detecta YouTube
+  // 2. Detecta YouTube
   const ytMatch = cleanUrl.match(
     /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
   )
@@ -78,7 +77,7 @@ function renderEmbeddedMedia(url: string) {
     )
   }
 
-  // Detecta Instagram
+  // 3. Detecta Instagram
   const igMatch = cleanUrl.match(
     /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:p|reel)\/([a-zA-Z0-9_-]+)/
   )
