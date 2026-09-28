@@ -37,7 +37,7 @@ Visualmente, el artista tiene detalles hasta en la ropa que viste, siendo el que
 
 Este disco ha tenido 3 videoclips. En “I Wanna Be Your Dog Again” aparece caracterizado como un perro y en “Sweet Fuego”, como canta en una casa en llamas.
 
-<https://open.spotify.com/intl-es/track/1UsZHabmIKCJ6EF4hFiCjg?si=3035d840a99642e6>
+<https://open.spotify.com/intl-es/album/5LYjokc0bkRmpo3zh43e3s?si=LY7xYlOQSmWYj-qZnFy4fA>
 
 Duckwrth ha decidido hacernos descubrir el otro lado de la cinta y darnos otra versión de un disco. Ocho canciones después, el álbum sigue explorando distintas atmósferas y subgéneros con total libertad.
 
