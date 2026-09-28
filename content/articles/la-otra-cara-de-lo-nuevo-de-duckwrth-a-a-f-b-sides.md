@@ -25,8 +25,6 @@ La canción “4 Wheel Truck”, de Duckwrth, fue lanzada originalmente como una
 
 <https://youtu.be/V93ux4tOdKU?list=PLMZxYs1_turU>
 
-
-
 En un vídeo publicado en TikTok, Duckwrth anunció que este nuevo álbum funciona como una edición deluxe de su anterior proyecto, *All American Fuckboy*, e incluye varias canciones que no llegaron a formar parte de la versión original del disco.
 
 Canciones de desamor y con letras curiosas mantienen la energía del artista al cien por cien.
@@ -38,9 +36,7 @@ El sonido de Duckwrth ha evolucionado a algo más punk, rock-alt, indie y ha per
 Visualmente, el artista tiene detalles hasta en la ropa que viste, siendo el que idea todo su imaginario y moda, apoderándose de la estrella como símbolo; lo podemos ver, por ejemplo, en el maquillaje.
 
 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 my-8">
-  <div class="overflow-hidden rounded-lg border-2 border-white/10 aspect-square"><img src="https://1s4oyld5dc.ucarecd.net/d0e157b5-4322-41b0-9568-cb2c79f733fa/" class="w-full h-full object-cover m-0" /></div>
-  <div class="overflow-hidden rounded-lg border-2 border-white/10 aspect-square"><img src="https://1s4oyld5dc.ucarecd.net/4c31635f-7d42-4d3c-b587-b8aeb8465b60/" class="w-full h-full object-cover m-0" /></div>
-  <div class="overflow-hidden rounded-lg border-2 border-white/10 aspect-square"><img src="https://1s4oyld5dc.ucarecd.net/6e18f0c5-81bd-47c2-8ce9-e9109bc1c707/" class="w-full h-full object-cover m-0" /></div>
+
 </div>
 
 Este disco ha tenido 3 videoclips. En “I Wanna Be Your Dog Again” aparece caracterizado como un perro y en “Sweet Fuego”, como canta en una casa en llamas.
