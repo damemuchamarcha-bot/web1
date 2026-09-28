@@ -5,9 +5,9 @@ import Link from 'next/link'
 import { Camera, AtSign, Play, Music2 } from 'lucide-react'
 
 const SOCIALS = [
-  { label: 'Instagram', href: 'https://instagram.com', Icon: Camera },
+  { label: 'Instagram', href: 'https://www.instagram.com/dame_marcha', Icon: Camera },
   { label: 'LinkedIn', href: 'https://linkedin.com', Icon: AtSign },
-  { label: 'Spotify', href: 'https://spotify.com', Icon: Music2 },
+  { label: 'Spotify', href: 'https://open.spotify.com/user/314a5fgcdsgspbyhmemy24mwiare', Icon: Music2 },
   { label: 'YouTube', href: 'https://youtube.com', Icon: Play },
 ]
 
