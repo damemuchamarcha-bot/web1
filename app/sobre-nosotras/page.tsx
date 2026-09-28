@@ -41,7 +41,7 @@ export default function SobreNosotrasPage() {
       <div className="mt-10 grid gap-10 lg:grid-cols-2 lg:items-center">
         <div className="relative aspect-[4/3] overflow-hidden border-2 border-punk-yellow">
           <Image
-            src="/images/Mesa de trabajo 2.png"
+            src="/images/sobre nosotras.jpg"
             alt="El equipo editorial de Dame Marcha"
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
