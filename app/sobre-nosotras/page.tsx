@@ -11,18 +11,18 @@ export const metadata: Metadata = {
 const VALUES = [
   {
     Icon: Megaphone,
-    title: 'Voz propia',
-    text: 'No repetimos notas de prensa. Escribimos lo que pensamos, guste a quien guste.',
+    title: 'Actualidad',
+    text: ' Enterate de las últimas novedades culturales',
   },
   {
     Icon: Flame,
-    title: 'Sin filtros',
-    text: 'Crítica honesta, apasionada y con criterio. La cultura se defiende con argumentos.',
+    title: 'Desde el corazón',
+    text: 'Crítica honesta y profesional.',
   },
   {
     Icon: Heart,
     title: 'De barrio',
-    text: 'Nacimos entre salas pequeñas y conciertos sudados. De ahí no nos movemos.',
+    text: 'Desde salas pequeñas con artistas top',
   },
 ]
 
@@ -51,19 +51,14 @@ export default function SobreNosotrasPage() {
         <div className="flex flex-col gap-5 text-pretty text-lg leading-relaxed text-punk-cream/80">
           <p>
             <span className="font-display text-2xl uppercase text-punk-cream">Dame Marcha</span>{' '}
-            nació en una cocina, entre discos apilados y entradas de cine arrugadas. Estábamos
-            hartas de leer sobre cultura como si fuera un catálogo, así que montamos nuestra
-            propia revista.
+            nació de la ilusión de dos amigas que estudiaban comunicación audiovisual.
           </p>
           <p>
-            Hablamos de cine y de música porque son las dos cosas que nos han salvado más
-            veces. Lo hacemos con rabia, con humor y con un respeto absoluto por quien lee.
-            Nada de textos vacíos ni entusiasmo de encargo.
+            Medio de comunicación dedicado a la divulgación de cultura musical y cinematográfica.
           </p>
           <p>
-            Somos independientes, ruidosas y muy cabezotas. Si algo nos gusta, lo gritamos.
-            Si algo nos parece una estafa, también. Esa es toda la línea editorial que
-            necesitamos.
+            Apostamos por el periodismo cultural independiente, con la intención de aportar frescura y calidad
+            desde un punto de vista joven y actual.
           </p>
         </div>
       </div>
