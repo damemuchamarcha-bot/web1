@@ -37,7 +37,7 @@ export function SiteFooter() {
               </span>
             </div>
             <p className="mt-5 max-w-md text-pretty text-base leading-relaxed text-punk-cream/70">
-              Revista cultural sin filtros. Cine y música contadas con rabia, criterio y
+              Revista cultural sin filtros. Cine y música contadas con criterio y
               buena tipografía. Hecha desde el barrio para quien todavía cree que la cultura
               se defiende.
             </p>
