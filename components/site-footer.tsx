@@ -14,13 +14,34 @@ const SOCIALS = [
 export function SiteFooter() {
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  function handleSubmit(e: React.FormEvent) {
-    if (!email) {
-      e.preventDefault()
-      return
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!email) return
+
+    setLoading(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('EMAIL', email)
+
+      await fetch(
+        'https://3ad35904.sibforms.com/v2/serve/MUIFAK_mVzAB-q0gCVdkvzTIS7_SzgZO0qb0CY3Znkewv8XyMMka_F8tbbGsBpIqCL0Uo4YRP6RtGchlMRWCkurDHXBM04lOhkHf0sIkylM_Pk-yZEYTE_G_WE9zQKztypF4RDNKpaL2DuP_D-mryDpM44UCeztDgIBpzMsYQgfn1ynhgRN9dWCuv4U1miImK8Ea0kAmwbdcK3YlzA==',
+        {
+          method: 'POST',
+          body: formData,
+          mode: 'no-cors',
+        }
+      )
+
+      setSent(true)
+      setEmail('')
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false)
     }
-    setSent(true)
   }
 
   return (
@@ -70,12 +91,7 @@ export function SiteFooter() {
               Nº 2026
             </span>
           </div>
-          <form 
-            action="https://3ad35904.sibforms.com/v2/serve/MUIFAK_mVzAB-q0gCVdkvzTIS7_SzgZO0qb0CY3Znkewv8XyMMka_F8tbbGsBpIqCL0Uo4YRP6RtGchlMRWCkurDHXBM04lOhkHf0sIkylM_Pk-yZEYTE_G_WE9zQKztypF4RDNKpaL2DuP_D-mryDpM44UCeztDgIBpzMsYQgfn1ynhgRN9dWCuv4U1miImK8Ea0kAmwbdcK3YlzA==" 
-            method="POST" 
-            onSubmit={handleSubmit} 
-            className="px-6 py-7"
-          >
+          <form onSubmit={handleSubmit} className="px-6 py-7">
             <h3 className="font-display text-3xl uppercase leading-none tracking-tight text-punk-cream">
               Únete a la <span className="text-punk-pink">marcha</span>
             </h3>
@@ -98,9 +114,10 @@ export function SiteFooter() {
               />
               <button
                 type="submit"
-                className="shrink-0 bg-punk-pink px-6 py-3 font-display text-sm uppercase tracking-wide text-punk-black transition-colors hover:bg-punk-yellow"
+                disabled={loading}
+                className="shrink-0 bg-punk-pink px-6 py-3 font-display text-sm uppercase tracking-wide text-punk-black transition-colors hover:bg-punk-yellow disabled:opacity-50"
               >
-                Apúntame
+                {loading ? 'Enviando...' : 'Apúntame'}
               </button>
             </div>
             {sent && (
