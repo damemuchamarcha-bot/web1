@@ -120,6 +120,15 @@ export function SiteFooter() {
                 {loading ? 'Enviando...' : 'Apúntame'}
               </button>
             </div>
+            
+            {/* Disclaimer RGPD del formulario */}
+            <p className="mt-3 text-[11px] leading-tight text-punk-cream/50">
+              Al suscribirte aceptas nuestra{' '}
+              <Link href="/politica-de-privacidad" className="underline hover:text-punk-pink">
+                Política de Privacidad
+              </Link>.
+            </p>
+
             {sent && (
               <p className="mt-3 text-sm font-semibold text-punk-yellow" role="status">
                 ¡Estás dentro! Nos vemos en la próxima.
@@ -130,15 +139,23 @@ export function SiteFooter() {
       </div>
 
       <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-5 text-xs text-punk-cream/50 sm:flex-row sm:px-6">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-5 text-xs text-punk-cream/50 sm:flex-row sm:px-6">
           <p>© 2026 Dame Marcha. Todos los ruidos reservados.</p>
-          <div className="flex gap-4">
+
+          {/* Enlaces Legales + Navegación Secundaria */}
+          <div className="flex flex-wrap items-center justify-center gap-4">
             <Link href="/sobre-nosotras" className="hover:text-punk-pink">
               Sobre Nosotras
             </Link>
-            <a href="#" className="hover:text-punk-pink">
-              Contacto
-            </a>
+            <Link href="/aviso-legal" className="hover:text-punk-pink">
+              Aviso Legal
+            </Link>
+            <Link href="/politica-de-privacidad" className="hover:text-punk-pink">
+              Política de Privacidad
+            </Link>
+            <Link href="/politica-de-cookies" className="hover:text-punk-pink">
+              Política de Cookies
+            </Link>
           </div>
         </div>
       </div>
