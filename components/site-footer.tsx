@@ -16,10 +16,11 @@ export function SiteFooter() {
   const [sent, setSent] = useState(false)
 
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!email) return
+    if (!email) {
+      e.preventDefault()
+      return
+    }
     setSent(true)
-    setEmail('')
   }
 
   return (
@@ -69,7 +70,12 @@ export function SiteFooter() {
               Nº 2026
             </span>
           </div>
-          <form onSubmit={handleSubmit} className="px-6 py-7">
+          <form 
+            action="https://3ad35904.sibforms.com/v2/serve/MUIFAK_mVzAB-q0gCVdkvzTIS7_SzgZO0qb0CY3Znkewv8XyMMka_F8tbbGsBpIqCL0Uo4YRP6RtGchlMRWCkurDHXBM04lOhkHf0sIkylM_Pk-yZEYTE_G_WE9zQKztypF4RDNKpaL2DuP_D-mryDpM44UCeztDgIBpzMsYQgfn1ynhgRN9dWCuv4U1miImK8Ea0kAmwbdcK3YlzA==" 
+            method="POST" 
+            onSubmit={handleSubmit} 
+            className="px-6 py-7"
+          >
             <h3 className="font-display text-3xl uppercase leading-none tracking-tight text-punk-cream">
               Únete a la <span className="text-punk-pink">marcha</span>
             </h3>
@@ -82,6 +88,7 @@ export function SiteFooter() {
               </label>
               <input
                 id="newsletter-email"
+                name="EMAIL"
                 type="email"
                 required
                 value={email}
