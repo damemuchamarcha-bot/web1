@@ -5,6 +5,8 @@ backend:
   base_url: https://decap-cms-oauth-orcin.vercel.app
   auth_endpoint: auth
 
+publish_mode: editorial_workflow
+
 media_library:
   name: uploadcare
   config:
