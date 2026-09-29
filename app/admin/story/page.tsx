@@ -14,49 +14,55 @@ export default function StoryGenerator() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
 
-  // Artículos cargados desde la web
+  // Lista de artículos cargados
   const [articles, setArticles] = useState<Article[]>([])
   const [selectedArticleSlug, setSelectedArticleSlug] = useState<string>('custom')
 
-  // Datos de la Story
+  // Estado de la Story
   const [title, setTitle] = useState('TÍTULO DE MUESTRA PARA EL ARTÍCULO')
-  const [category, setCategory] = useState('MÚSICA')
+  const [category, setCategory] = useState<'MÚSICA' | 'CINE'>('MÚSICA')
   const [mediaSrc, setMediaSrc] = useState<string | null>(null)
   const [isVideo, setIsVideo] = useState(false)
 
-  // Cargar artículos al iniciar o desbloquear
+  // Intentar cargar artículos desde los feeds o rutas de la web al entrar
   useEffect(() => {
-    fetch('/api/articles')
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setArticles(data)
+    async function loadArticles() {
+      try {
+        const res = await fetch('/api/articles')
+        if (res.ok) {
+          const data = await res.json()
+          if (Array.isArray(data)) setArticles(data)
         }
-      })
-      .catch(() => {
-        // Manejo silencioso si no hay API aún
-      })
+      } catch (err) {
+        console.log('No se pudieron cargar artículos automáticamente:', err)
+      }
+    }
+    loadArticles()
   }, [])
 
   const handleSelectArticle = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value
     setSelectedArticleSlug(val)
 
-    if (val === 'custom') {
-      return
-    }
+    if (val === 'custom') return
 
     const found = articles.find((a) => a.slug === val || a.title === val)
     if (found) {
       setTitle(found.title)
-      setCategory(found.category || 'MÚSICA')
+      // Normalizar categoría solo a MÚSICA o CINE
+      const catUpper = (found.category || '').toUpperCase()
+      if (catUpper.includes('CINE')) {
+        setCategory('CINE')
+      } else {
+        setCategory('MÚSICA')
+      }
     }
   }
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
     const secretKey = process.env.NEXT_PUBLIC_ADMIN_SECRET || 'damemarcha2026'
-    
+
     if (password === secretKey) {
       setIsAuthenticated(true)
       setError(false)
@@ -122,7 +128,6 @@ export default function StoryGenerator() {
   return (
     <div className="min-h-screen bg-punk-black p-4 text-punk-cream sm:p-8">
       <div className="mx-auto max-w-6xl">
-        {/* Cabecera del Panel */}
         <div className="mb-8 flex items-center justify-between border-b border-punk-pink/30 pb-4">
           <div>
             <h1 className="font-display text-3xl uppercase tracking-wider text-punk-pink">
@@ -148,7 +153,6 @@ export default function StoryGenerator() {
                 1. Contenido del artículo
               </h2>
 
-              {/* Selección de artículo publicado o personalizado */}
               <div className="mb-4">
                 <label className="mb-1 block font-sans text-xs uppercase tracking-wider text-punk-cream/80">
                   Cargar desde la web
@@ -158,7 +162,7 @@ export default function StoryGenerator() {
                   onChange={handleSelectArticle}
                   className="w-full border border-punk-pink/40 bg-punk-black p-3 font-sans text-sm text-punk-cream focus:border-punk-pink focus:outline-none"
                 >
-                  <option value="custom">✏️ Titular Personalizado (Escribir a mano)</option>
+                  <option value="custom">✏️️ Titular Personalizado (Escribir a mano)</option>
                   {articles.length > 0 ? (
                     articles.map((art, idx) => (
                       <option key={art.slug || idx} value={art.slug || art.title}>
@@ -166,19 +170,19 @@ export default function StoryGenerator() {
                       </option>
                     ))
                   ) : (
-                    <option disabled value="">(Sin entradas detectadas o escribe abajo)</option>
+                    <option disabled value="">(Sin entradas detectadas automáticas)</option>
                   )}
                 </select>
               </div>
 
-              {/* Categorías ajustadas de la revista */}
+              {/* Categorías exclusivas: MÚSICA y CINE */}
               <div className="mb-4">
                 <label className="mb-1 block font-sans text-xs uppercase tracking-wider text-punk-cream/80">
                   Categoría
                 </label>
                 <select
                   value={category}
-                  onChange={(e) => setCategory(e.target.value)}
+                  onChange={(e) => setCategory(e.target.value as 'MÚSICA' | 'CINE')}
                   className="w-full border border-punk-cream/20 bg-punk-black p-3 font-display uppercase text-punk-cream focus:border-punk-pink focus:outline-none"
                 >
                   <option value="MÚSICA">MÚSICA</option>
@@ -220,20 +224,19 @@ export default function StoryGenerator() {
                 2. Instrucciones
               </h2>
               <p className="text-xs leading-relaxed text-punk-cream/70">
-                • Selecciona un artículo publicado para autorrellenar el título o escribe uno manual.<br />
-                • Los textos respetan las <strong>zonas seguras de Instagram</strong>.<br />
-                • Sube una foto o vídeo MP4 y ajusta la vista previa 9:16.
+                • Selecciona un artículo o introduce el texto manualmente.<br />
+                • Categorías disponibles: <strong>MÚSICA</strong> y <strong>CINE</strong>.<br />
+                • Respeta la zona segura de Instagram.
               </p>
             </div>
           </div>
 
-          {/* Canvas de previsualización 9:16 (Instagram Story) */}
+          {/* Canvas de previsualización 9:16 */}
           <div className="flex justify-center lg:col-span-7">
             <div
               id="story-canvas"
               className="relative aspect-[9/16] w-full max-w-[380px] overflow-hidden border-4 border-punk-pink bg-black shadow-2xl"
             >
-              {/* Fondo (Foto o Vídeo) */}
               {mediaSrc ? (
                 isVideo ? (
                   <video
@@ -259,10 +262,8 @@ export default function StoryGenerator() {
                 </div>
               )}
 
-              {/* Degradado oscuro para lectura de texto */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/60" />
 
-              {/* Marca de agua / Cabecera */}
               <div className="absolute left-6 right-6 top-12 flex items-center justify-between">
                 <span className="border border-punk-cream/20 bg-punk-black/80 px-3 py-1 font-display text-xs uppercase tracking-widest text-punk-cream">
                   DAME MARCHA
@@ -272,7 +273,6 @@ export default function StoryGenerator() {
                 </span>
               </div>
 
-              {/* Bloque del Titular */}
               <div className="absolute bottom-20 left-6 right-6 space-y-3">
                 <div className="inline-block bg-punk-yellow px-2 py-0.5 font-display text-[10px] uppercase text-punk-black">
                   NUEVO ARTÍCULO
