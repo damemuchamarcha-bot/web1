@@ -20,13 +20,12 @@ export default function StoryGenerator() {
 
   // Datos de la Story
   const [title, setTitle] = useState('TÍTULO DE MUESTRA PARA EL ARTÍCULO')
-  const [category, setCategory] = useState('CINE')
+  const [category, setCategory] = useState('MÚSICA')
   const [mediaSrc, setMediaSrc] = useState<string | null>(null)
   const [isVideo, setIsVideo] = useState(false)
 
   // Cargar artículos al iniciar o desbloquear
   useEffect(() => {
-    // Intentamos obtener la lista de artículos desde la API interna o el feed
     fetch('/api/articles')
       .then((res) => res.json())
       .then((data) => {
@@ -35,7 +34,7 @@ export default function StoryGenerator() {
         }
       })
       .catch(() => {
-        // Si no hay endpoint API configurado aún, dejamos la opción manual
+        // Manejo silencioso si no hay API aún
       })
   }, [])
 
@@ -50,7 +49,7 @@ export default function StoryGenerator() {
     const found = articles.find((a) => a.slug === val || a.title === val)
     if (found) {
       setTitle(found.title)
-      setCategory(found.category || 'CINE')
+      setCategory(found.category || 'MÚSICA')
     }
   }
 
@@ -172,6 +171,7 @@ export default function StoryGenerator() {
                 </select>
               </div>
 
+              {/* Categorías ajustadas de la revista */}
               <div className="mb-4">
                 <label className="mb-1 block font-sans text-xs uppercase tracking-wider text-punk-cream/80">
                   Categoría
@@ -181,10 +181,8 @@ export default function StoryGenerator() {
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full border border-punk-cream/20 bg-punk-black p-3 font-display uppercase text-punk-cream focus:border-punk-pink focus:outline-none"
                 >
-                  <option value="CINE">CINE</option>
                   <option value="MÚSICA">MÚSICA</option>
-                  <option value="ENTREVISTA">ENTREVISTA</option>
-                  <option value="CRÍTICA">CRÍTICA</option>
+                  <option value="CINE">CINE</option>
                 </select>
               </div>
 
@@ -224,7 +222,7 @@ export default function StoryGenerator() {
               <p className="text-xs leading-relaxed text-punk-cream/70">
                 • Selecciona un artículo publicado para autorrellenar el título o escribe uno manual.<br />
                 • Los textos respetan las <strong>zonas seguras de Instagram</strong>.<br />
-                • Sube una foto o vídeo MP4 y ajusta la vista previa $9:16$.
+                • Sube una foto o vídeo MP4 y ajusta la vista previa 9:16.
               </p>
             </div>
           </div>
