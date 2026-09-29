@@ -9,12 +9,15 @@ import { ArticleListing } from '@/components/article-listing'
 
 const DESCRIPTIONS: Record<CategorySlug, string> = {
   'proximos-estrenos':
-   'Guía sin spoilers de los estrenos que darán que hablar.',
+    'Guía sin spoilers de los estrenos que darán que hablar.',
   'analisis-de-cine':
     'Todo lo que se esconde entre planos.',
-  'critica-de-cine':,
-      'analisis-de-albumes':,
-  directos:,
+  'critica-de-cine':
+    'Reseñas directas y al grano de los últimos títulos.',
+  'analisis-de-albumes':
+    'Escucha atenta y análisis de los lanzamientos musicales.',
+  'directos':
+    'Crónicas, fotos y ruido directo desde las salas.',
 }
 
 export function generateStaticParams() {
