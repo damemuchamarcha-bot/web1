@@ -1,7 +1,11 @@
 import { articles } from '@/lib/articles'
 
+// Le indica a Next.js que esta ruta se genere estáticamente en el build
+export const dynamic = 'force-static'
+
 export async function GET() {
-  const baseUrl = 'https://web1-eight-swart.vercel.app/' // Cambia esto por tu dominio final si lo tienes
+  // Sustituye esta URL por la dirección provisional de Vercel
+  const baseUrl = 'https://web1-eight-swart.vercel.app'
 
   const feedItemsXml = articles
     .map((article) => {
