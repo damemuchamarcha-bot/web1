@@ -19,10 +19,53 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'DAME MARCHA — Revista de Cine y Música',
+  title: {
+    default: 'DAME MARCHA — Revista de Cine y Música',
+    template: '%s | DAME MARCHA',
+  },
   description:
     'Revista cultural neo-punk. Cine y música sin filtros: próximos estrenos, crítica, análisis de álbumes y directos.',
+  keywords: [
+    'cine',
+    'música',
+    'crítica de cine',
+    'análisis de álbumes',
+    'directos',
+    'revista cultural',
+    'neo-punk',
+  ],
+  authors: [{ name: 'Dame Marcha' }],
+  creator: 'Dame Marcha',
   generator: 'v0.app',
+  openGraph: {
+    type: 'website',
+    locale: 'es_ES',
+    url: 'https://tu-proyecto.vercel.app',
+    title: 'DAME MARCHA — Revista de Cine y Música',
+    description:
+      'Revista cultural neo-punk. Cine y música sin filtros: próximos estrenos, crítica, análisis de álbumes y directos.',
+    siteName: 'Dame Marcha',
+    images: [
+      {
+        url: '/uploads/og-cover.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Dame Marcha - Revista Cultural',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'DAME MARCHA — Revista de Cine y Música',
+    description:
+      'Revista cultural neo-punk. Cine y música sin filtros.',
+    images: ['/uploads/og-cover.jpg'],
+  },
+  icons: {
+    icon: '/icon.png',
+    shortcut: '/icon.png',
+    apple: '/icon.png',
+  },
 }
 
 export const viewport: Viewport = {
