@@ -9,15 +9,12 @@ import { ArticleListing } from '@/components/article-listing'
 
 const DESCRIPTIONS: Record<CategorySlug, string> = {
   'proximos-estrenos':
-    'Lo que llega a la cartelera antes de que llegue. Guía sin spoilers de los estrenos que darán que hablar.',
+   'Guía sin spoilers de los estrenos que darán que hablar.',
   'analisis-de-cine':
-    'Diseccionamos el cine fotograma a fotograma: montaje, estética y todo lo que se esconde entre planos.',
-  'critica-de-cine':
-    'Opinión sin anestesia. Las películas que defendemos y las que no, con argumentos y sin complejos.',
-  'analisis-de-albumes':
-    'Diez canciones, cuarenta minutos y una tesis. Escuchamos los discos enteros para contarte lo que importa.',
-  directos:
-    'Crónicas desde la primera fila. El sudor, el ruido y esos 90 minutos que no se olvidan.',
+    'Todo lo que se esconde entre planos.',
+  'critica-de-cine':,
+      'analisis-de-albumes':,
+  directos:,
 }
 
 export function generateStaticParams() {
