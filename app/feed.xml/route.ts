@@ -1,7 +1,7 @@
 import { articles } from '@/lib/articles'
 
 export async function GET() {
-  const baseUrl = 'https://damemarcha.com' // Cambia esto por tu dominio final si lo tienes
+  const baseUrl = 'https://web1-eight-swart.vercel.app/' // Cambia esto por tu dominio final si lo tienes
 
   const feedItemsXml = articles
     .map((article) => {
