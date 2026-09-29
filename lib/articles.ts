@@ -4,21 +4,39 @@ import matter from 'gray-matter'
 
 const articlesDirectory = path.join(process.cwd(), 'content/articles')
 
-export type CategorySlug = 'analisis-de-albumes' | 'entrevistas' | 'cronicas' | 'criticas' | 'reportajes'
+// Subcategorías válidas
+export type CategorySlug =
+  | 'analisis-de-cine'
+  | 'critica-de-cine'
+  | 'proximos-estrenos'
+  | 'analisis-de-albumes'
+  | 'directos'
+
+// Secciones principales (Sección Madre)
+export type SectionSlug = 'cine' | 'musica'
 
 export const CATEGORY_LABELS: Record<CategorySlug, string> = {
+  'analisis-de-cine': 'Análisis de Cine',
+  'critica-de-cine': 'Crítica de Cine',
+  'proximos-estrenos': 'Próximos Estrenos',
   'analisis-de-albumes': 'Análisis de Álbumes',
-  'entrevistas': 'Entrevistas',
-  'cronicas': 'Crónicas',
-  'criticas': 'Críticas',
-  'reportajes': 'Reportajes',
+  'directos': 'Directos',
+}
+
+// Mapeo automático de Subcategoría -> Sección Principal
+export const CATEGORY_TO_SECTION: Record<CategorySlug, SectionSlug> = {
+  'analisis-de-cine': 'cine',
+  'critica-de-cine': 'cine',
+  'proximos-estrenos': 'cine',
+  'analisis-de-albumes': 'musica',
+  'directos': 'musica',
 }
 
 export interface Article {
   slug: string
   title: string
   excerpt: string
-  section: string
+  section: SectionSlug | string
   category: CategorySlug | string
   categoryLabel: string
   author: string
@@ -66,7 +84,7 @@ export function getAllArticles(): Article[] {
         rawImage = '/placeholder.svg'
       }
 
-      // --- YOUTUBE GLOBAL (Busca en cabecera O dentro del texto del artículo) ---
+      // --- YOUTUBE GLOBAL ---
       let rawYoutube = data.youtube || data.video || data.yt || ''
       if (!rawYoutube) {
         const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
@@ -88,7 +106,6 @@ export function getAllArticles(): Article[] {
         const spRegex = /(?:https?:\/\/)?(?:open\.)?spotify\.com\/(?:track|album|playlist)\/([a-zA-Z0-9]+)/
         const matchSp = content.match(spRegex)
         if (matchSp && matchSp[1]) {
-          // Detectamos si es álbum o track de forma sencilla
           const type = content.includes('/album/') ? 'album' : 'track'
           rawSpotify = `https://open.spotify.com/embed/${type}/${matchSp[1]}`
         }
@@ -114,15 +131,18 @@ export function getAllArticles(): Article[] {
         ? content.split('\n\n').map((p) => p.trim()).filter(Boolean)
         : ['Contenido próximamente...']
 
-      const category = data.category || 'analisis-de-albumes'
+      const category = (data.category || 'analisis-de-albumes') as CategorySlug
+      
+      // Asigna la sección automáticamente según la subcategoría si no viene definida en el archivo markdown
+      const section = data.section || CATEGORY_TO_SECTION[category] || 'cine'
 
       return {
         slug,
         title: data.title,
         excerpt: data.excerpt || '',
-        section: data.section || 'musica',
+        section,
         category,
-        categoryLabel: data.categoryLabel || CATEGORY_LABELS[category as CategorySlug] || 'Artículo',
+        categoryLabel: data.categoryLabel || CATEGORY_LABELS[category] || 'Artículo',
         author: data.author || 'Redacción',
         date: data.date
           ? new Date(data.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()
