@@ -5,7 +5,7 @@ import { ArticleListing } from '@/components/article-listing'
 export const metadata: Metadata = {
   title: 'Música — Dame Marcha',
   description:
-    'Análisis de álbumes y crónicas de directos. La música que importa, a todo volumen.',
+    'Análisis de álbumes y crónicas de directos.',
 }
 
 export default function MusicaPage() {
@@ -13,8 +13,7 @@ export default function MusicaPage() {
     <ArticleListing
       eyebrow="Sección"
       title="Música"
-      description="Análisis de álbumes y crónicas de directos. La música que importa contada a todo volumen, con los oídos pitando y el corazón en la garganta."
-      articles={getBySection('musica')}
+        articles={getBySection('musica')}
     />
   )
 }
