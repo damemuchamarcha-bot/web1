@@ -1,13 +1,70 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
+interface Article {
+  title: string
+  category: string
+  slug?: string
+}
+
 export default function StoryGenerator() {
-  const [title, setTitle] = useState('TITULO DE MUESTRA PARA EL ARTÍCULO')
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState(false)
+
+  // Artículos cargados desde la web
+  const [articles, setArticles] = useState<Article[]>([])
+  const [selectedArticleSlug, setSelectedArticleSlug] = useState<string>('custom')
+
+  // Datos de la Story
+  const [title, setTitle] = useState('TÍTULO DE MUESTRA PARA EL ARTÍCULO')
   const [category, setCategory] = useState('CINE')
   const [mediaSrc, setMediaSrc] = useState<string | null>(null)
   const [isVideo, setIsVideo] = useState(false)
+
+  // Cargar artículos al iniciar o desbloquear
+  useEffect(() => {
+    // Intentamos obtener la lista de artículos desde la API interna o el feed
+    fetch('/api/articles')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setArticles(data)
+        }
+      })
+      .catch(() => {
+        // Si no hay endpoint API configurado aún, dejamos la opción manual
+      })
+  }, [])
+
+  const handleSelectArticle = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value
+    setSelectedArticleSlug(val)
+
+    if (val === 'custom') {
+      return
+    }
+
+    const found = articles.find((a) => a.slug === val || a.title === val)
+    if (found) {
+      setTitle(found.title)
+      setCategory(found.category || 'CINE')
+    }
+  }
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault()
+    const secretKey = process.env.NEXT_PUBLIC_ADMIN_SECRET || 'damemarcha2026'
+    
+    if (password === secretKey) {
+      setIsAuthenticated(true)
+      setError(false)
+    } else {
+      setError(true)
+    }
+  }
 
   const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -16,6 +73,51 @@ export default function StoryGenerator() {
       setIsVideo(file.type.startsWith('video/'))
       setMediaSrc(url)
     }
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-punk-black p-4 text-punk-cream">
+        <form
+          onSubmit={handleLogin}
+          className="w-full max-w-md border border-punk-pink/40 bg-black/80 p-8 shadow-2xl backdrop-blur"
+        >
+          <div className="mb-6 text-center">
+            <span className="bg-punk-pink px-3 py-1 font-display text-xs uppercase tracking-widest text-punk-black">
+              DAME MARCHA
+            </span>
+            <h1 className="mt-4 font-display text-2xl uppercase text-punk-pink">
+              Acceso Restringido
+            </h1>
+            <p className="mt-1 text-xs text-punk-cream/60">
+              Introduce la clave para acceder al generador de Stories.
+            </p>
+          </div>
+
+          <div className="mb-4">
+            <input
+              type="password"
+              placeholder="Contraseña de administrador"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border border-punk-cream/20 bg-punk-black p-3 font-mono text-sm text-punk-cream focus:border-punk-pink focus:outline-none"
+            />
+            {error && (
+              <p className="mt-2 text-xs text-red-500">
+                Contraseña incorrecta. Inténtalo de nuevo.
+              </p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-punk-pink p-3 font-display uppercase tracking-wider text-punk-black transition-colors hover:bg-punk-yellow"
+          >
+            Entrar
+          </button>
+        </form>
+      </div>
+    )
   }
 
   return (
@@ -31,22 +133,45 @@ export default function StoryGenerator() {
               Adapta tus entradas con fotos o vídeos para Instagram.
             </p>
           </div>
-          <Link
-            href="/"
+          <button
+            onClick={() => setIsAuthenticated(false)}
             className="bg-punk-pink/10 px-4 py-2 font-display text-sm uppercase text-punk-pink hover:bg-punk-pink hover:text-punk-black"
           >
-            ← Volver a la web
-          </Link>
+            Cerrar Sesión
+          </button>
         </div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-          {/* Panel de Control (Controles) */}
+          {/* Panel de Control */}
           <div className="space-y-6 lg:col-span-5">
             <div className="border border-punk-cream/10 bg-black/40 p-6 backdrop-blur">
               <h2 className="mb-4 font-display text-xl uppercase text-punk-yellow">
                 1. Contenido del artículo
               </h2>
-              
+
+              {/* Selección de artículo publicado o personalizado */}
+              <div className="mb-4">
+                <label className="mb-1 block font-sans text-xs uppercase tracking-wider text-punk-cream/80">
+                  Cargar desde la web
+                </label>
+                <select
+                  value={selectedArticleSlug}
+                  onChange={handleSelectArticle}
+                  className="w-full border border-punk-pink/40 bg-punk-black p-3 font-sans text-sm text-punk-cream focus:border-punk-pink focus:outline-none"
+                >
+                  <option value="custom">✏️ Titular Personalizado (Escribir a mano)</option>
+                  {articles.length > 0 ? (
+                    articles.map((art, idx) => (
+                      <option key={art.slug || idx} value={art.slug || art.title}>
+                        📄 {art.title}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled value="">(Sin entradas detectadas o escribe abajo)</option>
+                  )}
+                </select>
+              </div>
+
               <div className="mb-4">
                 <label className="mb-1 block font-sans text-xs uppercase tracking-wider text-punk-cream/80">
                   Categoría
@@ -70,7 +195,10 @@ export default function StoryGenerator() {
                 <textarea
                   rows={3}
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) => {
+                    setTitle(e.target.value)
+                    setSelectedArticleSlug('custom')
+                  }}
                   className="w-full border border-punk-cream/20 bg-punk-black p-3 font-display uppercase tracking-wide text-punk-cream focus:border-punk-pink focus:outline-none"
                   placeholder="Escribe aquí el titular..."
                 />
@@ -84,7 +212,7 @@ export default function StoryGenerator() {
                   type="file"
                   accept="image/*,video/*"
                   onChange={handleMediaUpload}
-                  className="w-full cursor-pointer border border-punk-cream/20 bg-punk-black p-2 font-sans text-sm text-punk-cream text-punk-cream/60 file:mr-4 file:border-0 file:bg-punk-pink file:px-4 file:py-2 file:font-display file:text-xs file:uppercase file:text-punk-black"
+                  className="w-full cursor-pointer border border-punk-cream/20 bg-punk-black p-2 font-sans text-sm text-punk-cream/60 file:mr-4 file:border-0 file:bg-punk-pink file:px-4 file:py-2 file:font-display file:text-xs file:uppercase file:text-punk-black"
                 />
               </div>
             </div>
@@ -94,9 +222,9 @@ export default function StoryGenerator() {
                 2. Instrucciones
               </h2>
               <p className="text-xs leading-relaxed text-punk-cream/70">
-                • Los textos están colocados respetando las <strong>zonas seguras de Instagram</strong> (para que no los tape el avatar superior ni la barra de respuestas).<br />
-                • Si subes una <strong>foto</strong>, haz una captura de pantalla del lienzo o guarda el frame.<br />
-                • Si subes un <strong>vídeo MP4</strong>, se reproducirá en bucle con la capa neo-punk superpuesta.
+                • Selecciona un artículo publicado para autorrellenar el título o escribe uno manual.<br />
+                • Los textos respetan las <strong>zonas seguras de Instagram</strong>.<br />
+                • Sube una foto o vídeo MP4 y ajusta la vista previa $9:16$.
               </p>
             </div>
           </div>
@@ -136,9 +264,9 @@ export default function StoryGenerator() {
               {/* Degradado oscuro para lectura de texto */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/60" />
 
-              {/* Marca de agua / Cabecera (Respetando zona superior IG) */}
+              {/* Marca de agua / Cabecera */}
               <div className="absolute left-6 right-6 top-12 flex items-center justify-between">
-                <span className="bg-punk-black/80 px-3 py-1 font-display text-xs uppercase tracking-widest text-punk-cream border border-punk-cream/20">
+                <span className="border border-punk-cream/20 bg-punk-black/80 px-3 py-1 font-display text-xs uppercase tracking-widest text-punk-cream">
                   DAME MARCHA
                 </span>
                 <span className="bg-punk-pink px-3 py-1 font-display text-xs uppercase tracking-wider text-punk-black">
@@ -146,12 +274,12 @@ export default function StoryGenerator() {
                 </span>
               </div>
 
-              {/* Bloque del Titular (Respetando zona central/inferior IG) */}
+              {/* Bloque del Titular */}
               <div className="absolute bottom-20 left-6 right-6 space-y-3">
                 <div className="inline-block bg-punk-yellow px-2 py-0.5 font-display text-[10px] uppercase text-punk-black">
                   NUEVO ARTÍCULO
                 </div>
-                <h3 className="bg-punk-black/90 p-4 font-display text-2xl uppercase leading-none tracking-tight text-punk-cream border-l-4 border-punk-pink">
+                <h3 className="border-l-4 border-punk-pink bg-punk-black/90 p-4 font-display text-2xl uppercase leading-none tracking-tight text-punk-cream">
                   {title}
                 </h3>
                 <div className="flex items-center justify-between bg-punk-pink p-2 text-punk-black">
