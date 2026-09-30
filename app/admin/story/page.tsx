@@ -28,9 +28,10 @@ export default function StoryGenerator() {
   const [recordingProgress, setRecordingProgress] = useState(0)
 
   // Referencias a elementos del DOM
+  const storyRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
 
-  // Cargar artículos opcionales desde la API
+  // Intentar cargar artículos desde los feeds o rutas de la web al entrar
   useEffect(() => {
     async function loadArticles() {
       try {
@@ -76,7 +77,7 @@ export default function StoryGenerator() {
     }
   }
 
-  // Carga de archivo usando FileReader
+  // Carga de archivo usando FileReader en formato Base64 nativo
   const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -93,100 +94,8 @@ export default function StoryGenerator() {
     }
   }
 
-  // FUNCIÓN AUXILIAR: Dibuja la superposición gráfica (textos, logos, diseño) sobre el Canvas
-  const drawOverlay = (
-    ctx: CanvasRenderingContext2D,
-    width: number,
-    height: number
-  ) => {
-    // 1. Degradado oscuro (gradiente de contraste)
-    const gradient = ctx.createLinearGradient(0, 0, 0, height)
-    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)')
-    gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.2)')
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.9)')
-    ctx.fillStyle = gradient
-    ctx.fillRect(0, 0, width, height)
-
-    // 2. Cabecera (Top Bar)
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)'
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)'
-    ctx.lineWidth = 2
-    ctx.fillRect(60, 80, 220, 50)
-    ctx.strokeRect(60, 80, 220, 50)
-
-    ctx.fillStyle = '#ffffff'
-    ctx.font = 'bold 20px sans-serif'
-    ctx.textAlign = 'center'
-    ctx.fillText('DAME MARCHA', 170, 112)
-
-    // Categoría
-    ctx.fillStyle = '#ff007f'
-    ctx.fillRect(860, 80, 160, 50)
-
-    ctx.fillStyle = '#000000'
-    ctx.font = 'bold 20px sans-serif'
-    ctx.fillText(category, 940, 112)
-
-    // 3. Etiqueta inferior
-    ctx.fillStyle = '#ffee00'
-    ctx.fillRect(60, 1380, 200, 35)
-
-    ctx.fillStyle = '#000000'
-    ctx.font = 'bold 16px sans-serif'
-    ctx.textAlign = 'left'
-    ctx.fillText('NUEVO ARTÍCULO', 75, 1403)
-
-    // Cuadro del titular
-    const boxX = 60
-    const boxY = 1430
-    const boxW = 960
-    const boxH = 260
-
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.9)'
-    ctx.fillRect(boxX, boxY, boxW, boxH)
-
-    ctx.fillStyle = '#ff007f'
-    ctx.fillRect(boxX, boxY, 16, boxH)
-
-    ctx.fillStyle = '#ffffff'
-    ctx.font = 'bold 42px sans-serif'
-    ctx.textAlign = 'left'
-
-    const words = title.toUpperCase().split(' ')
-    let line = ''
-    let lineY = boxY + 70
-    const maxLineWidth = boxW - 60
-
-    for (let n = 0; n < words.length; n++) {
-      const testLine = line + words[n] + ' '
-      const metrics = ctx.measureText(testLine)
-      if (metrics.width > maxLineWidth && n > 0) {
-        ctx.fillText(line, boxX + 40, lineY)
-        line = words[n] + ' '
-        lineY += 55
-        if (lineY > boxY + boxH - 30) break
-      } else {
-        line = testLine
-      }
-    }
-    if (lineY <= boxY + boxH - 20) {
-      ctx.fillText(line, boxX + 40, lineY)
-    }
-
-    // Call to Action
-    ctx.fillStyle = '#ff007f'
-    ctx.fillRect(boxX, 1710, boxW, 60)
-
-    ctx.fillStyle = '#000000'
-    ctx.font = 'bold 22px sans-serif'
-    ctx.fillText('LEE MÁS EN LA WEB', boxX + 30, 1747)
-    ctx.textAlign = 'right'
-    ctx.fillText('→', boxX + boxW - 30, 1747)
-  }
-
-  // --- DESCARGAR FOTO (JPG) ---
+  // --- FUNCIÓN 1: DESCARGAR FOTO (JPG) USANDO CANVAS NATIVO ---
   const downloadAsImage = async () => {
-    if (typeof window === 'undefined') return
     setIsExporting(true)
 
     try {
@@ -194,11 +103,14 @@ export default function StoryGenerator() {
       canvas.width = 1080
       canvas.height = 1920
       const ctx = canvas.getContext('2d')
-      if (!ctx) throw new Error('No se pudo inicializar canvas')
 
+      if (!ctx) throw new Error('No se pudo inicializar el canvas')
+
+      // 1. Fondo negro por defecto
       ctx.fillStyle = '#000000'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
+      // 2. Dibujar la imagen seleccionada con Object-Fit Cover
       if (mediaSrc) {
         const img = new Image()
         img.crossOrigin = 'anonymous'
@@ -226,128 +138,183 @@ export default function StoryGenerator() {
         ctx.drawImage(img, offsetX, offsetY, renderWidth, renderHeight)
       }
 
-      drawOverlay(ctx, canvas.width, canvas.height)
+      // 3. Gradiente superpuesto (oscurecer fondo)
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
+      gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)')
+      gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.2)')
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0.9)')
+      ctx.fillStyle = gradient
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
 
+      // 4. Cabecera (Top Bar)
+      // Caja "DAME MARCHA"
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)'
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)'
+      ctx.lineWidth = 2
+      ctx.fillRect(60, 80, 220, 50)
+      ctx.strokeRect(60, 80, 220, 50)
+
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 20px sans-serif'
+      ctx.textAlign = 'center'
+      ctx.fillText('DAME MARCHA', 170, 112)
+
+      // Caja Categoría ("MÚSICA" / "CINE")
+      ctx.fillStyle = '#ff007f' // punk-pink
+      ctx.fillRect(860, 80, 160, 50)
+
+      ctx.fillStyle = '#000000'
+      ctx.font = 'bold 20px sans-serif'
+      ctx.fillText(category, 940, 112)
+
+      // 5. Bloque Inferior (Titular y Call to Action)
+      // Etiqueta "NUEVO ARTÍCULO"
+      ctx.fillStyle = '#ffee00' // punk-yellow
+      ctx.fillRect(60, 1380, 200, 35)
+
+      ctx.fillStyle = '#000000'
+      ctx.font = 'bold 16px sans-serif'
+      ctx.textAlign = 'left'
+      ctx.fillText('NUEVO ARTÍCULO', 75, 1403)
+
+      // Cuadro principal con el titular del artículo
+      const boxX = 60
+      const boxY = 1430
+      const boxW = 960
+      const boxH = 260
+
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.9)'
+      ctx.fillRect(boxX, boxY, boxW, boxH)
+
+      // Borde rosa a la izquierda
+      ctx.fillStyle = '#ff007f'
+      ctx.fillRect(boxX, boxY, 16, boxH)
+
+      // Texto del Titular (multilínea automático)
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 42px sans-serif'
+      ctx.textAlign = 'left'
+
+      const words = title.toUpperCase().split(' ')
+      let line = ''
+      let lineY = boxY + 70
+      const maxLineWidth = boxW - 60
+
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' '
+        const metrics = ctx.measureText(testLine)
+        if (metrics.width > maxLineWidth && n > 0) {
+          ctx.fillText(line, boxX + 40, lineY)
+          line = words[n] + ' '
+          lineY += 55
+          if (lineY > boxY + boxH - 30) break
+        } else {
+          line = testLine
+        }
+      }
+      if (lineY <= boxY + boxH - 20) {
+        ctx.fillText(line, boxX + 40, lineY)
+      }
+
+      // Banner inferior "LEE MÁS EN LA WEB ->"
+      ctx.fillStyle = '#ff007f'
+      ctx.fillRect(boxX, 1710, boxW, 60)
+
+      ctx.fillStyle = '#000000'
+      ctx.font = 'bold 22px sans-serif'
+      ctx.fillText('LEE MÁS EN LA WEB', boxX + 30, 1747)
+      ctx.textAlign = 'right'
+      ctx.fillText('→', boxX + boxW - 30, 1747)
+
+      // 6. Descargar la imagen
       const dataUrl = canvas.toDataURL('image/jpeg', 0.95)
       const link = document.createElement('a')
       link.download = `story-${category.toLowerCase()}-${Date.now()}.jpg`
       link.href = dataUrl
       link.click()
     } catch (err) {
-      console.error('Error generando foto:', err)
-      alert('Hubo un error al generar la foto.')
+      console.error('Error exportando imagen:', err)
+      alert('Hubo un error al generar la imagen.')
     } finally {
       setIsExporting(false)
     }
   }
 
-  // --- DESCARGAR VÍDEO (MP4 / WebM) SÍNCRONO CON CANVAS ---
+  // --- FUNCIÓN 2: GRABAR Y DESCARGAR VÍDEO (MP4 / WebM) ---
   const downloadAsVideo = async () => {
-    if (typeof window === 'undefined' || !videoRef.current) return
+    if (!storyRef.current || !videoRef.current) return
 
     setIsExporting(true)
     setRecordingProgress(0)
 
     try {
-      const video = videoRef.current
+      const html2canvas = (await import('html2canvas')).default
+      const container = storyRef.current
+      const videoElement = videoRef.current
+
+      videoElement.currentTime = 0
+      await videoElement.play()
+
       const canvas = document.createElement('canvas')
       canvas.width = 1080
       canvas.height = 1920
       const ctx = canvas.getContext('2d')
-      if (!ctx) throw new Error('No se pudo obtener el contexto del canvas')
-
-      video.currentTime = 0
-      video.muted = true
-
-      try {
-        await video.play()
-      } catch (playErr) {
-        console.warn('Iniciando reproducción de vídeo:', playErr)
-      }
-
-      let mimeType = 'video/webm'
-      if (typeof MediaRecorder !== 'undefined') {
-        if (MediaRecorder.isTypeSupported('video/mp4;codecs=h264')) {
-          mimeType = 'video/mp4;codecs=h264'
-        } else if (MediaRecorder.isTypeSupported('video/mp4')) {
-          mimeType = 'video/mp4'
-        } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
-          mimeType = 'video/webm;codecs=vp9'
-        }
-      }
+      if (!ctx) return
 
       const stream = canvas.captureStream(30)
-      const recorder = new MediaRecorder(stream, { mimeType })
-      const chunks: Blob[] = []
+      const mimeType = MediaRecorder.isTypeSupported('video/mp4')
+        ? 'video/mp4'
+        : 'video/webm'
 
-      recorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) chunks.push(e.data)
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType,
+        videoBitsPerSecond: 8000000,
+      })
+
+      const chunks: Blob[] = []
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data)
       }
 
-      recorder.onstop = () => {
+      mediaRecorder.onstop = () => {
         const blob = new Blob(chunks, { type: mimeType })
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        const ext = mimeType.includes('mp4') ? 'mp4' : 'webm'
-        a.download = `story-${category.toLowerCase()}-${Date.now()}.${ext}`
+        a.download = `story-${category.toLowerCase()}-${Date.now()}.${
+          mimeType.includes('mp4') ? 'mp4' : 'webm'
+        }`
         a.click()
-        URL.revokeObjectURL(url)
         setIsExporting(false)
         setRecordingProgress(0)
       }
 
-      recorder.start()
+      mediaRecorder.start()
 
-      const duration =
-        video.duration && !isNaN(video.duration) && video.duration > 0
-          ? video.duration
-          : 5
+      const DURATION = 5
+      const fps = 30
+      const totalFrames = DURATION * fps
+      let currentFrame = 0
 
-      const startTime = Date.now()
+      const interval = setInterval(async () => {
+        currentFrame++
+        setRecordingProgress(Math.round((currentFrame / totalFrames) * 100))
 
-      const renderFrame = () => {
-        const elapsed = (Date.now() - startTime) / 1000
-        const progress = Math.min(Math.round((elapsed / duration) * 100), 100)
-        setRecordingProgress(progress)
+        const frameCanvas = await html2canvas(container, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+        })
+        ctx.drawImage(frameCanvas, 0, 0, canvas.width, canvas.height)
 
-        ctx.fillStyle = '#000000'
-        ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-        if (video.videoWidth > 0 && video.videoHeight > 0) {
-          const vRatio = video.videoWidth / video.videoHeight
-          const cRatio = canvas.width / canvas.height
-          let renderW = canvas.width
-          let renderH = canvas.height
-          let offsetX = 0
-          let offsetY = 0
-
-          if (vRatio > cRatio) {
-            renderW = canvas.height * vRatio
-            offsetX = (canvas.width - renderW) / 2
-          } else {
-            renderH = canvas.width / vRatio
-            offsetY = (canvas.height - renderH) / 2
-          }
-
-          ctx.drawImage(video, offsetX, offsetY, renderW, renderH)
+        if (currentFrame >= totalFrames) {
+          clearInterval(interval)
+          mediaRecorder.stop()
         }
-
-        drawOverlay(ctx, canvas.width, canvas.height)
-
-        if (elapsed < duration && !video.ended) {
-          requestAnimationFrame(renderFrame)
-        } else {
-          if (recorder.state !== 'inactive') {
-            recorder.stop()
-          }
-        }
-      }
-
-      renderFrame()
+      }, 1000 / fps)
     } catch (err) {
-      console.error('Error durante la grabación:', err)
-      alert('Error al grabar el vídeo.')
+      console.error('Error durante la grabación del vídeo:', err)
+      alert('Hubo un problema al grabar el vídeo.')
       setIsExporting(false)
     }
   }
@@ -528,6 +495,7 @@ export default function StoryGenerator() {
           {/* Canvas de previsualización 9:16 */}
           <div className="flex justify-center lg:col-span-7">
             <div
+              ref={storyRef}
               id="story-canvas"
               className="relative aspect-[9/16] w-full max-w-[380px] overflow-hidden border-4 border-punk-pink bg-black shadow-2xl"
             >
