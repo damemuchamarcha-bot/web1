@@ -72,12 +72,19 @@
   --radius: 0.5rem;
 }
 
+html {
+  background-color: #121212;
+  color-scheme: dark;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+    background-color: #121212;
+    color: #f5f5f0;
     background-image:
       radial-gradient(120% 80% at 50% -10%, oklch(0.26 0.03 55 / 0.6), transparent 60%),
       radial-gradient(80% 60% at 100% 100%, oklch(0.22 0.05 350 / 0.25), transparent 55%);
