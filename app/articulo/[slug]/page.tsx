@@ -20,9 +20,34 @@ export async function generateMetadata({
   const { slug } = await params
   const article = getArticle(slug)
   if (!article) return { title: 'Artículo no encontrado — Dame Marcha' }
+
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://damemarcha.com'
+
   return {
     title: `${article.title} — Dame Marcha`,
     description: article.excerpt,
+    openGraph: {
+      title: article.title,
+      description: article.excerpt,
+      url: `${baseUrl}/articulo/${article.slug}`,
+      siteName: 'Dame Marcha',
+      images: [
+        {
+          url: article.image,
+          width: 1200,
+          height: 630,
+          alt: article.title,
+        },
+      ],
+      locale: 'es_ES',
+      type: 'article',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.title,
+      description: article.excerpt,
+      images: [article.image],
+    },
   }
 }
 
