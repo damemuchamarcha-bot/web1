@@ -7,6 +7,7 @@ import ReactMarkdown from 'react-markdown'
 import { articles, getArticle, getRecent } from '@/lib/articles'
 import { CategoryTag } from '@/components/category-tag'
 import { ArticleCard } from '@/components/article-card'
+import { ReadingProgressBar, ShareButtons } from '@/components/share-and-progress'
 
 export function generateStaticParams() {
   return articles.map((a) => ({ slug: a.slug }))
@@ -56,7 +57,7 @@ function renderEmbeddedMedia(url: string) {
   if (!url) return null
   const cleanUrl = url.trim()
 
-  // 1. Detectar Spotify con cualquier variación de URL (parámetros, idiomas, etc.)
+  // 1. Detectar Spotify
   const isSpotify = cleanUrl.includes('spotify.com') || cleanUrl.includes('spotify.link')
   if (isSpotify) {
     const spMatch = cleanUrl.match(/(track|album|playlist|episode|show)\/([a-zA-Z0-9]+)/)
@@ -81,7 +82,7 @@ function renderEmbeddedMedia(url: string) {
     }
   }
 
-  // 2. Detecta YouTube
+  // 2. Detectar YouTube
   const ytMatch = cleanUrl.match(
     /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
   )
@@ -102,14 +103,14 @@ function renderEmbeddedMedia(url: string) {
     )
   }
 
-  // 3. Detecta Instagram
+  // 3. Detectar Instagram
   const igMatch = cleanUrl.match(
     /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:p|reel)\/([a-zA-Z0-9_-]+)/
   )
   if (igMatch && igMatch[1]) {
     return (
       <div className="my-8 w-full clear-both">
-        <div className="relative aspect-[4/5] max-w-md mx-auto overflow-hidden border-2 border-punk-cream/20 bg-punk-black/80">
+        <div className="relative aspect-[4/5] mx-auto max-w-md overflow-hidden border-2 border-punk-cream/20 bg-punk-black/80">
           <iframe
             title="Publicación de Instagram"
             src={`https://www.instagram.com/p/${igMatch[1]}/embed`}
@@ -136,8 +137,42 @@ export default async function ArticlePage({
 
   const related = getRecent(article.slug).slice(0, 3)
 
+  // Datos estructurados (JSON-LD) para SEO y Google News
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://damemarcha.com'
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: article.title,
+    description: article.excerpt,
+    image: [article.image?.startsWith('http') ? article.image : `${baseUrl}${article.image}`],
+    datePublished: article.date,
+    author: [
+      {
+        '@type': 'Person',
+        name: article.author || 'Dame Marcha',
+      },
+    ],
+    publisher: {
+      '@type': 'Organization',
+      name: 'Dame Marcha',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${baseUrl}/icon.png`,
+      },
+    },
+  }
+
   return (
     <article>
+      {/* Barra de progreso de lectura */}
+      <ReadingProgressBar />
+
+      {/* Script JSON-LD para Google News / Rich Results */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* Portada */}
       <div className="relative aspect-[16/10] w-full sm:aspect-[21/9]">
         <Image
@@ -187,12 +222,15 @@ export default async function ArticlePage({
           </span>
         </div>
 
+        {/* Botones para compartir en redes y copiar enlace */}
+        <ShareButtons title={article.title} />
+
         {/* Cuerpo del artículo */}
         <div className="mt-10 flex flex-col gap-6">
           {article.body.map((para, i) => {
             const trimmed = para.trim()
 
-            // 1. Revisa si la línea o párrafo es un enlace directo de Spotify/YouTube/Instagram
+            // 1. Revisa si la línea es un enlace directo de Spotify/YouTube/Instagram
             const mediaEmbed = renderEmbeddedMedia(trimmed)
             if (mediaEmbed) {
               return <div key={i}>{mediaEmbed}</div>
