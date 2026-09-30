@@ -11,6 +11,7 @@ media_library:
   name: uploadcare
   config:
     publicKey: "0c8ace87549de321b182"
+    useFullUrl: true    # <--- ESTO ES LO CLAVE: obliga a guardar "https://ucarecdn.com/..."
     tabs: "file url camera gdrive"
     effects: "crop,rotate"
     settings:
