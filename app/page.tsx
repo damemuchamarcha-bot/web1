@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { getFeatured, getRecent } from '@/lib/articles'
+import { getFeatured, getRecent, articles } from '@/lib/articles'
 import { HeroArticle } from '@/components/hero-article'
 import { ArticleCard } from '@/components/article-card'
 import { Marquee } from '@/components/marquee'
+import { ArticleSearch } from '@/components/article-search'
 
 export default function HomePage() {
   const featured = getFeatured()
@@ -13,6 +14,7 @@ export default function HomePage() {
 
   return (
     <>
+      {/* 1. Hero / Artículo destacado principal */}
       <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
         <HeroArticle article={featured} />
       </section>
@@ -21,7 +23,8 @@ export default function HomePage() {
         <Marquee />
       </div>
 
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+      {/* 2. Lo Último — Layout editorial asimétrico */}
+      <section className="mx-auto max-w-7xl px-4 pt-14 sm:px-6">
         <div className="mb-8 flex items-end justify-between border-b-2 border-punk-pink pb-4">
           <h2 className="font-display text-3xl uppercase leading-none tracking-tight text-punk-cream sm:text-4xl">
             Lo último <span className="text-punk-pink">/</span> Noticias y reseñas
@@ -31,7 +34,7 @@ export default function HomePage() {
           </span>
         </div>
 
-        {/* Asymmetric editorial grid */}
+        {/* Grid asimétrico */}
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 lg:row-span-2">
             <ArticleCard article={lead} size="lg" />
@@ -40,8 +43,22 @@ export default function HomePage() {
             <ArticleCard key={article.slug} article={article} />
           ))}
         </div>
+      </section>
 
-        <div className="mt-12 flex flex-col items-center justify-center gap-6 border-2 border-punk-yellow bg-punk-charcoal px-6 py-10 text-center">
+      {/* 3. Buscador interactivo + Filtros por etiqueta */}
+      <section className="mx-auto max-w-7xl px-4 pt-16 sm:px-6">
+        <div className="mb-8 border-b-2 border-punk-yellow pb-4">
+          <h2 className="font-display text-3xl uppercase leading-none tracking-tight text-punk-cream sm:text-4xl">
+            Buscador <span className="text-punk-yellow">/</span> Explora el archivo
+          </h2>
+        </div>
+
+        <ArticleSearch articles={articles} />
+      </section>
+
+      {/* 4. Banner final CTA */}
+      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+        <div className="flex flex-col items-center justify-center gap-6 border-2 border-punk-yellow bg-punk-charcoal px-6 py-10 text-center">
           <h3 className="max-w-2xl text-balance font-display text-3xl uppercase leading-none tracking-tight text-punk-cream sm:text-4xl">
             ¿Te has quedado con ganas de más marcha?
           </h3>
