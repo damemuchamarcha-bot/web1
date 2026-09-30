@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { toJpeg } from 'html-to-image'
-import html2canvas from 'html2canvas'
+import { toPng, toJpeg } from 'html-to-image'
 
 interface Article {
   title: string
@@ -25,11 +24,9 @@ export default function StoryGenerator() {
   const [mediaSrc, setMediaSrc] = useState<string | null>(null)
   const [isVideo, setIsVideo] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
-  const [recordingProgress, setRecordingProgress] = useState(0)
 
-  // Referencia al contenedor 9:16 y al elemento de vídeo
+  // Referencia al contenedor 9:16
   const storyRef = useRef<HTMLDivElement>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
     async function loadArticles() {
@@ -85,14 +82,14 @@ export default function StoryGenerator() {
     }
   }
 
-  // 1. Descargar como IMAGEN (JPG)
+  // Función para descargar la Story como Imagen (JPG HD para Instagram)
   const downloadAsImage = async () => {
     if (!storyRef.current) return
     setIsExporting(true)
     try {
       const dataUrl = await toJpeg(storyRef.current, {
         quality: 0.95,
-        pixelRatio: 3,
+        pixelRatio: 3, // Alta definición para Stories (1080x1920)
       })
       const link = document.createElement('a')
       link.download = `story-${category.toLowerCase()}-${Date.now()}.jpg`
@@ -100,90 +97,8 @@ export default function StoryGenerator() {
       link.click()
     } catch (err) {
       console.error('Error exportando imagen:', err)
-      alert('Error al generar la imagen.')
+      alert('Error al generar la imagen. Inténtalo de nuevo.')
     } finally {
-      setIsExporting(false)
-    }
-  }
-
-  // 2. Grabación y descarga de VÍDEO (MediaRecorder)
-  const downloadAsVideo = async () => {
-    if (!storyRef.current || !videoRef.current) return
-
-    setIsExporting(true)
-    setRecordingProgress(0)
-
-    try {
-      const container = storyRef.current
-      const videoElement = videoRef.current
-
-      // Reiniciar el vídeo al segundo 0
-      videoElement.currentTime = 0
-      await videoElement.play()
-
-      // Crear un canvas invisible para renderizar los fotogramas
-      const canvas = document.createElement('canvas')
-      canvas.width = 1080
-      canvas.height = 1920
-      const ctx = canvas.getContext('2d')
-      if (!ctx) return
-
-      const stream = canvas.captureStream(30) // 30 FPS
-      const mimeType = MediaRecorder.isTypeSupported('video/mp4')
-        ? 'video/mp4'
-        : 'video/webm'
-
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType,
-        videoBitsPerSecond: 8000000, // 8 Mbps para buena calidad
-      })
-
-      const chunks: Blob[] = []
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunks.push(e.data)
-      }
-
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: mimeType })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `story-${category.toLowerCase()}-${Date.now()}.${
-          mimeType.includes('mp4') ? 'mp4' : 'webm'
-        }`
-        a.click()
-        setIsExporting(false)
-        setRecordingProgress(0)
-      }
-
-      mediaRecorder.start()
-
-      // Duración de la grabación en segundos (ej. 5 segundos para Story)
-      const DURATION = 5 
-      const fps = 30
-      const totalFrames = DURATION * fps
-      let currentFrame = 0
-
-      const interval = setInterval(async () => {
-        currentFrame++
-        setRecordingProgress(Math.round((currentFrame / totalFrames) * 100))
-
-        // Renderizar el contenido HTML sobre el canvas
-        const frameCanvas = await html2canvas(container, {
-          scale: 2,
-          useCORS: true,
-          logging: false,
-        })
-        ctx.drawImage(frameCanvas, 0, 0, canvas.width, canvas.height)
-
-        if (currentFrame >= totalFrames) {
-          clearInterval(interval)
-          mediaRecorder.stop()
-        }
-      }, 1000 / fps)
-    } catch (err) {
-      console.error('Error durante la grabación de vídeo:', err)
-      alert('Hubo un problema al procesar el vídeo.')
       setIsExporting(false)
     }
   }
@@ -202,6 +117,9 @@ export default function StoryGenerator() {
             <h1 className="mt-4 font-display text-2xl uppercase text-punk-pink">
               Acceso Restringido
             </h1>
+            <p className="mt-1 text-xs text-punk-cream/60">
+              Introduce la clave para acceder al generador de Stories.
+            </p>
           </div>
 
           <div className="mb-4">
@@ -214,14 +132,14 @@ export default function StoryGenerator() {
             />
             {error && (
               <p className="mt-2 text-xs text-red-500">
-                Contraseña incorrecta.
+                Contraseña incorrecta. Inténtalo de nuevo.
               </p>
             )}
           </div>
 
           <button
             type="submit"
-            className="w-full bg-punk-pink p-3 font-display uppercase tracking-wider text-punk-black hover:bg-punk-yellow"
+            className="w-full bg-punk-pink p-3 font-display uppercase tracking-wider text-punk-black transition-colors hover:bg-punk-yellow"
           >
             Entrar
           </button>
@@ -267,15 +185,20 @@ export default function StoryGenerator() {
                   onChange={handleSelectArticle}
                   className="w-full border border-punk-pink/40 bg-punk-black p-3 font-sans text-sm text-punk-cream focus:border-punk-pink focus:outline-none"
                 >
-                  <option value="custom">✏️ Titular Personalizado</option>
-                  {articles.map((art, idx) => (
-                    <option key={art.slug || idx} value={art.slug || art.title}>
-                      📄 {art.title}
-                    </option>
-                  ))}
+                  <option value="custom">✏️ Titular Personalizado (Escribir a mano)</option>
+                  {articles.length > 0 ? (
+                    articles.map((art, idx) => (
+                      <option key={art.slug || idx} value={art.slug || art.title}>
+                        📄 {art.title}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled value="">(Sin entradas detectadas automáticas)</option>
+                  )}
                 </select>
               </div>
 
+              {/* Categorías exclusivas: MÚSICA y CINE */}
               <div className="mb-4">
                 <label className="mb-1 block font-sans text-xs uppercase tracking-wider text-punk-cream/80">
                   Categoría
@@ -318,27 +241,15 @@ export default function StoryGenerator() {
                 />
               </div>
 
-              {/* Botón dinámico según el tipo de archivo subido */}
+              {/* Botón de Exportar / Descargar */}
               <div className="mt-6 border-t border-punk-cream/10 pt-4">
-                {isVideo ? (
-                  <button
-                    onClick={downloadAsVideo}
-                    disabled={isExporting}
-                    className="w-full bg-punk-yellow py-3 font-display text-sm uppercase tracking-wider text-punk-black transition-all hover:bg-punk-pink disabled:opacity-50"
-                  >
-                    {isExporting
-                      ? `🎬 Grabando Vídeo... (${recordingProgress}%)`
-                      : '🎥 Descargar Story en VÍDEO (MP4)'}
-                  </button>
-                ) : (
-                  <button
-                    onClick={downloadAsImage}
-                    disabled={isExporting}
-                    className="w-full bg-punk-pink py-3 font-display text-sm uppercase tracking-wider text-punk-black transition-all hover:bg-punk-yellow disabled:opacity-50"
-                  >
-                    {isExporting ? 'Generando Imagen...' : '🖼️ Descargar Story en FOTO (JPG)'}
-                  </button>
-                )}
+                <button
+                  onClick={downloadAsImage}
+                  disabled={isExporting}
+                  className="w-full bg-punk-pink py-3 font-display text-sm uppercase tracking-wider text-punk-black transition-all hover:bg-punk-yellow disabled:opacity-50"
+                >
+                  {isExporting ? 'Generando Story...' : '⬇️ Descargar Story (Instagram)'}
+                </button>
               </div>
             </div>
           </div>
@@ -353,7 +264,6 @@ export default function StoryGenerator() {
               {mediaSrc ? (
                 isVideo ? (
                   <video
-                    ref={videoRef}
                     src={mediaSrc}
                     autoPlay
                     loop
