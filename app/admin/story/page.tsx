@@ -1,4 +1,16 @@
-// --- FUNCIÓN 2: GRABAR Y DESCARGAR VÍDEO (MP4 / WebM) NATIVO ---
+'use client'
+
+import { useRef, useState } from 'react'
+
+export default function AdminStoryPage() {
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const [mediaSrc, setMediaSrc] = useState<string>('')
+  const [category, setCategory] = useState<string>('MUSICA')
+  const [title, setTitle] = useState<string>('TITULAR DE PRUEBA')
+  const [isExporting, setIsExporting] = useState<boolean>(false)
+  const [recordingProgress, setRecordingProgress] = useState<number>(0)
+
+  // --- FUNCIÓN 2: GRABAR Y DESCARGAR VÍDEO (MP4 / WebM) NATIVO ---
   const downloadAsVideo = async () => {
     if (!videoRef.current || !mediaSrc) return
 
@@ -190,3 +202,28 @@
       setIsExporting(false)
     }
   }
+
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Generador de Story</h1>
+      
+      {/* Elemento de Vídeo para la vista previa */}
+      <video
+        ref={videoRef}
+        src={mediaSrc}
+        crossOrigin="anonymous"
+        className="hidden"
+        playsInline
+        muted
+      />
+
+      <button
+        onClick={downloadAsVideo}
+        disabled={isExporting}
+        className="px-4 py-2 bg-pink-600 text-white rounded hover:bg-pink-700 disabled:opacity-50"
+      >
+        {isExporting ? `Exportando vídeo... (${recordingProgress}%)` : 'Descargar Vídeo'}
+      </button>
+    </div>
+  )
+}
