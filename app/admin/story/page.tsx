@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { toPng, toJpeg } from 'html-to-image'
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
 
 interface Article {
   title: string
@@ -23,11 +23,8 @@ export default function StoryGenerator() {
   const [category, setCategory] = useState<'MÚSICA' | 'CINE'>('MÚSICA')
   const [mediaSrc, setMediaSrc] = useState<string | null>(null)
   const [isVideo, setIsVideo] = useState(false)
-  const [isExporting, setIsExporting] = useState(false)
 
-  // Referencia al contenedor 9:16
-  const storyRef = useRef<HTMLDivElement>(null)
-
+  // Intentar cargar artículos desde los feeds o rutas de la web al entrar
   useEffect(() => {
     async function loadArticles() {
       try {
@@ -52,6 +49,7 @@ export default function StoryGenerator() {
     const found = articles.find((a) => a.slug === val || a.title === val)
     if (found) {
       setTitle(found.title)
+      // Normalizar categoría solo a MÚSICA o CINE
       const catUpper = (found.category || '').toUpperCase()
       if (catUpper.includes('CINE')) {
         setCategory('CINE')
@@ -79,27 +77,6 @@ export default function StoryGenerator() {
       const url = URL.createObjectURL(file)
       setIsVideo(file.type.startsWith('video/'))
       setMediaSrc(url)
-    }
-  }
-
-  // Función para descargar la Story como Imagen (JPG HD para Instagram)
-  const downloadAsImage = async () => {
-    if (!storyRef.current) return
-    setIsExporting(true)
-    try {
-      const dataUrl = await toJpeg(storyRef.current, {
-        quality: 0.95,
-        pixelRatio: 3, // Alta definición para Stories (1080x1920)
-      })
-      const link = document.createElement('a')
-      link.download = `story-${category.toLowerCase()}-${Date.now()}.jpg`
-      link.href = dataUrl
-      link.click()
-    } catch (err) {
-      console.error('Error exportando imagen:', err)
-      alert('Error al generar la imagen. Inténtalo de nuevo.')
-    } finally {
-      setIsExporting(false)
     }
   }
 
@@ -185,7 +162,7 @@ export default function StoryGenerator() {
                   onChange={handleSelectArticle}
                   className="w-full border border-punk-pink/40 bg-punk-black p-3 font-sans text-sm text-punk-cream focus:border-punk-pink focus:outline-none"
                 >
-                  <option value="custom">✏️ Titular Personalizado (Escribir a mano)</option>
+                  <option value="custom">✏️️ Titular Personalizado (Escribir a mano)</option>
                   {articles.length > 0 ? (
                     articles.map((art, idx) => (
                       <option key={art.slug || idx} value={art.slug || art.title}>
@@ -240,24 +217,23 @@ export default function StoryGenerator() {
                   className="w-full cursor-pointer border border-punk-cream/20 bg-punk-black p-2 font-sans text-sm text-punk-cream/60 file:mr-4 file:border-0 file:bg-punk-pink file:px-4 file:py-2 file:font-display file:text-xs file:uppercase file:text-punk-black"
                 />
               </div>
+            </div>
 
-              {/* Botón de Exportar / Descargar */}
-              <div className="mt-6 border-t border-punk-cream/10 pt-4">
-                <button
-                  onClick={downloadAsImage}
-                  disabled={isExporting}
-                  className="w-full bg-punk-pink py-3 font-display text-sm uppercase tracking-wider text-punk-black transition-all hover:bg-punk-yellow disabled:opacity-50"
-                >
-                  {isExporting ? 'Generando Story...' : '⬇️ Descargar Story (Instagram)'}
-                </button>
-              </div>
+            <div className="border border-punk-cream/10 bg-black/40 p-6 backdrop-blur">
+              <h2 className="mb-2 font-display text-xl uppercase text-punk-yellow">
+                2. Instrucciones
+              </h2>
+              <p className="text-xs leading-relaxed text-punk-cream/70">
+                • Selecciona un artículo o introduce el texto manualmente.<br />
+                • Categorías disponibles: <strong>MÚSICA</strong> y <strong>CINE</strong>.<br />
+                • Respeta la zona segura de Instagram.
+              </p>
             </div>
           </div>
 
           {/* Canvas de previsualización 9:16 */}
-          <div className="flex flex-col items-center justify-center lg:col-span-7">
+          <div className="flex justify-center lg:col-span-7">
             <div
-              ref={storyRef}
               id="story-canvas"
               className="relative aspect-[9/16] w-full max-w-[380px] overflow-hidden border-4 border-punk-pink bg-black shadow-2xl"
             >
