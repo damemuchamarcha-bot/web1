@@ -56,7 +56,6 @@ export default function StoryGenerator() {
     const found = articles.find((a) => a.slug === val || a.title === val)
     if (found) {
       setTitle(found.title)
-      // Normalizar categoría solo a MÚSICA o CINE
       const catUpper = (found.category || '').toUpperCase()
       if (catUpper.includes('CINE')) {
         setCategory('CINE')
@@ -78,30 +77,156 @@ export default function StoryGenerator() {
     }
   }
 
+  // Carga de archivo usando FileReader en formato Base64 nativo
   const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      const url = URL.createObjectURL(file)
-      setIsVideo(file.type.startsWith('video/'))
-      setMediaSrc(url)
+      const isVid = file.type.startsWith('video/')
+      setIsVideo(isVid)
+
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setMediaSrc(event.target.result as string)
+        }
+      }
+      reader.readAsDataURL(file)
     }
   }
 
-  // --- FUNCIÓN 1: DESCARGAR FOTO (JPG) MEJORADA CON HTML2CANVAS ---
+  // --- FUNCIÓN 1: DESCARGAR FOTO (JPG) USANDO CANVAS NATIVO ---
   const downloadAsImage = async () => {
-    if (!storyRef.current) return
     setIsExporting(true)
-    try {
-      const html2canvas = (await import('html2canvas')).default
-      
-      const canvas = await html2canvas(storyRef.current, {
-        scale: 3, // Alta definición para Stories (1080x1920)
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#000000',
-        logging: false,
-      })
 
+    try {
+      const canvas = document.createElement('canvas')
+      canvas.width = 1080
+      canvas.height = 1920
+      const ctx = canvas.getContext('2d')
+
+      if (!ctx) throw new Error('No se pudo inicializar el canvas')
+
+      // 1. Fondo negro por defecto
+      ctx.fillStyle = '#000000'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      // 2. Dibujar la imagen seleccionada con Object-Fit Cover
+      if (mediaSrc) {
+        const img = new Image()
+        img.crossOrigin = 'anonymous'
+        await new Promise((resolve, reject) => {
+          img.onload = resolve
+          img.onerror = reject
+          img.src = mediaSrc
+        })
+
+        const imgRatio = img.width / img.height
+        const canvasRatio = canvas.width / canvas.height
+        let renderWidth = canvas.width
+        let renderHeight = canvas.height
+        let offsetX = 0
+        let offsetY = 0
+
+        if (imgRatio > canvasRatio) {
+          renderWidth = canvas.height * imgRatio
+          offsetX = (canvas.width - renderWidth) / 2
+        } else {
+          renderHeight = canvas.width / imgRatio
+          offsetY = (canvas.height - renderHeight) / 2
+        }
+
+        ctx.drawImage(img, offsetX, offsetY, renderWidth, renderHeight)
+      }
+
+      // 3. Gradiente superpuesto (oscurecer fondo)
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
+      gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)')
+      gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.2)')
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0.9)')
+      ctx.fillStyle = gradient
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      // 4. Cabecera (Top Bar)
+      // Caja "DAME MARCHA"
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)'
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)'
+      ctx.lineWidth = 2
+      ctx.fillRect(60, 80, 220, 50)
+      ctx.strokeRect(60, 80, 220, 50)
+
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 20px sans-serif'
+      ctx.textAlign = 'center'
+      ctx.fillText('DAME MARCHA', 170, 112)
+
+      // Caja Categoría ("MÚSICA" / "CINE")
+      ctx.fillStyle = '#ff007f' // punk-pink
+      ctx.fillRect(860, 80, 160, 50)
+
+      ctx.fillStyle = '#000000'
+      ctx.font = 'bold 20px sans-serif'
+      ctx.fillText(category, 940, 112)
+
+      // 5. Bloque Inferior (Titular y Call to Action)
+      // Etiqueta "NUEVO ARTÍCULO"
+      ctx.fillStyle = '#ffee00' // punk-yellow
+      ctx.fillRect(60, 1380, 200, 35)
+
+      ctx.fillStyle = '#000000'
+      ctx.font = 'bold 16px sans-serif'
+      ctx.textAlign = 'left'
+      ctx.fillText('NUEVO ARTÍCULO', 75, 1403)
+
+      // Cuadro principal con el titular del artículo
+      const boxX = 60
+      const boxY = 1430
+      const boxW = 960
+      const boxH = 260
+
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.9)'
+      ctx.fillRect(boxX, boxY, boxW, boxH)
+
+      // Borde rosa a la izquierda
+      ctx.fillStyle = '#ff007f'
+      ctx.fillRect(boxX, boxY, 16, boxH)
+
+      // Texto del Titular (multilínea automático)
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 42px sans-serif'
+      ctx.textAlign = 'left'
+
+      const words = title.toUpperCase().split(' ')
+      let line = ''
+      let lineY = boxY + 70
+      const maxLineWidth = boxW - 60
+
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' '
+        const metrics = ctx.measureText(testLine)
+        if (metrics.width > maxLineWidth && n > 0) {
+          ctx.fillText(line, boxX + 40, lineY)
+          line = words[n] + ' '
+          lineY += 55
+          if (lineY > boxY + boxH - 30) break
+        } else {
+          line = testLine
+        }
+      }
+      if (lineY <= boxY + boxH - 20) {
+        ctx.fillText(line, boxX + 40, lineY)
+      }
+
+      // Banner inferior "LEE MÁS EN LA WEB ->"
+      ctx.fillStyle = '#ff007f'
+      ctx.fillRect(boxX, 1710, boxW, 60)
+
+      ctx.fillStyle = '#000000'
+      ctx.font = 'bold 22px sans-serif'
+      ctx.fillText('LEE MÁS EN LA WEB', boxX + 30, 1747)
+      ctx.textAlign = 'right'
+      ctx.fillText('→', boxX + boxW - 30, 1747)
+
+      // 6. Descargar la imagen
       const dataUrl = canvas.toDataURL('image/jpeg', 0.95)
       const link = document.createElement('a')
       link.download = `story-${category.toLowerCase()}-${Date.now()}.jpg`
@@ -166,7 +291,7 @@ export default function StoryGenerator() {
 
       mediaRecorder.start()
 
-      const DURATION = 5 // Duración de la Story grabada en segundos
+      const DURATION = 5
       const fps = 30
       const totalFrames = DURATION * fps
       let currentFrame = 0
@@ -289,7 +414,6 @@ export default function StoryGenerator() {
                 </select>
               </div>
 
-              {/* Categorías exclusivas: MÚSICA y CINE */}
               <div className="mb-4">
                 <label className="mb-1 block font-sans text-xs uppercase tracking-wider text-punk-cream/80">
                   Categoría
