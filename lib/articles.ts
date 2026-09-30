@@ -4,6 +4,12 @@ import matter from 'gray-matter'
 
 const articlesDirectory = path.join(process.cwd(), 'content/articles')
 
+// Helper para convertir automáticamente URLs de ucarecdn.net a ucarecdn.com
+function sanitizeImageUrl(url?: string): string {
+  if (!url) return ''
+  return url.replace(/ucarecdn\.net/g, 'ucarecdn.com')
+}
+
 // Subcategorías válidas
 export type CategorySlug =
   | 'analisis-de-cine'
@@ -75,6 +81,7 @@ export function getAllArticles(): Article[] {
       // --- IMAGEN GLOBAL ---
       let rawImage = data.image || data.thumbnail || data.portada || data.photo || '/placeholder.svg'
       if (typeof rawImage === 'string' && rawImage.trim() !== '') {
+        rawImage = sanitizeImageUrl(rawImage)
         if (rawImage.startsWith('uploads/')) {
           rawImage = `/${rawImage}`
         } else if (!rawImage.startsWith('http') && !rawImage.startsWith('/')) {
@@ -120,15 +127,17 @@ export function getAllArticles(): Article[] {
       const formattedGallery = Array.isArray(rawGallery) 
         ? rawGallery.map((img: string) => {
             if (typeof img === 'string') {
-              if (img.startsWith('uploads/')) return `/${img}`
-              return img.startsWith('http') || img.startsWith('/') ? img : `/${img}`
+              const cleanImg = sanitizeImageUrl(img)
+              if (cleanImg.startsWith('uploads/')) return `/${cleanImg}`
+              return cleanImg.startsWith('http') || cleanImg.startsWith('/') ? cleanImg : `/${cleanImg}`
             }
             return ''
           }).filter(Boolean)
         : []
 
+      // --- CUERPO DEL ARTÍCULO Y SANEAMIENTO DE IMÁGENES EMBEDDED ---
       const rawBody = content
-        ? content.split('\n\n').map((p) => p.trim()).filter(Boolean)
+        ? content.split('\n\n').map((p) => sanitizeImageUrl(p.trim())).filter(Boolean)
         : ['Contenido próximamente...']
 
       const category = (data.category || 'analisis-de-albumes') as CategorySlug
