@@ -87,16 +87,22 @@ export default function StoryGenerator() {
     }
   }
 
-  // --- FUNCIÓN 1: DESCARGAR FOTO (JPG) ---
+  // --- FUNCIÓN 1: DESCARGAR FOTO (JPG) MEJORADA CON HTML2CANVAS ---
   const downloadAsImage = async () => {
     if (!storyRef.current) return
     setIsExporting(true)
     try {
-      const { toJpeg } = await import('html-to-image')
-      const dataUrl = await toJpeg(storyRef.current, {
-        quality: 0.95,
-        pixelRatio: 3, // Calidad alta (1080x1920)
+      const html2canvas = (await import('html2canvas')).default
+      
+      const canvas = await html2canvas(storyRef.current, {
+        scale: 3, // Alta definición para Stories (1080x1920)
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#000000',
+        logging: false,
       })
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.95)
       const link = document.createElement('a')
       link.download = `story-${category.toLowerCase()}-${Date.now()}.jpg`
       link.href = dataUrl
