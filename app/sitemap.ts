@@ -1,10 +1,12 @@
 import type { MetadataRoute } from 'next'
 import { articles } from '@/lib/articles'
 
+// Añade esta línea para indicar que la ruta se debe exportar de forma estática
+export const dynamic = 'force-static'
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://damemarcha.com'
 
-  // Rutas dinámicas de las noticias
   const articleUrls = articles.map((article) => ({
     url: `${baseUrl}/articulo/${article.slug}`,
     lastModified: new Date(),
@@ -12,7 +14,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }))
 
-  // Rutas estáticas principales
   const staticUrls = [
     {
       url: baseUrl,
