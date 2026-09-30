@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { useState, useEffect, useRef } from 'react'
+import { toJpeg } from 'html-to-image'
+import html2canvas from 'html2canvas'
 
 interface Article {
   title: string
@@ -23,8 +24,13 @@ export default function StoryGenerator() {
   const [category, setCategory] = useState<'MÚSICA' | 'CINE'>('MÚSICA')
   const [mediaSrc, setMediaSrc] = useState<string | null>(null)
   const [isVideo, setIsVideo] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
+  const [recordingProgress, setRecordingProgress] = useState(0)
 
-  // Intentar cargar artículos desde los feeds o rutas de la web al entrar
+  // Referencia al contenedor 9:16 y al elemento de vídeo
+  const storyRef = useRef<HTMLDivElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+
   useEffect(() => {
     async function loadArticles() {
       try {
@@ -49,7 +55,6 @@ export default function StoryGenerator() {
     const found = articles.find((a) => a.slug === val || a.title === val)
     if (found) {
       setTitle(found.title)
-      // Normalizar categoría solo a MÚSICA o CINE
       const catUpper = (found.category || '').toUpperCase()
       if (catUpper.includes('CINE')) {
         setCategory('CINE')
@@ -80,6 +85,109 @@ export default function StoryGenerator() {
     }
   }
 
+  // 1. Descargar como IMAGEN (JPG)
+  const downloadAsImage = async () => {
+    if (!storyRef.current) return
+    setIsExporting(true)
+    try {
+      const dataUrl = await toJpeg(storyRef.current, {
+        quality: 0.95,
+        pixelRatio: 3,
+      })
+      const link = document.createElement('a')
+      link.download = `story-${category.toLowerCase()}-${Date.now()}.jpg`
+      link.href = dataUrl
+      link.click()
+    } catch (err) {
+      console.error('Error exportando imagen:', err)
+      alert('Error al generar la imagen.')
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  // 2. Grabación y descarga de VÍDEO (MediaRecorder)
+  const downloadAsVideo = async () => {
+    if (!storyRef.current || !videoRef.current) return
+
+    setIsExporting(true)
+    setRecordingProgress(0)
+
+    try {
+      const container = storyRef.current
+      const videoElement = videoRef.current
+
+      // Reiniciar el vídeo al segundo 0
+      videoElement.currentTime = 0
+      await videoElement.play()
+
+      // Crear un canvas invisible para renderizar los fotogramas
+      const canvas = document.createElement('canvas')
+      canvas.width = 1080
+      canvas.height = 1920
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+
+      const stream = canvas.captureStream(30) // 30 FPS
+      const mimeType = MediaRecorder.isTypeSupported('video/mp4')
+        ? 'video/mp4'
+        : 'video/webm'
+
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType,
+        videoBitsPerSecond: 8000000, // 8 Mbps para buena calidad
+      })
+
+      const chunks: Blob[] = []
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data)
+      }
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: mimeType })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `story-${category.toLowerCase()}-${Date.now()}.${
+          mimeType.includes('mp4') ? 'mp4' : 'webm'
+        }`
+        a.click()
+        setIsExporting(false)
+        setRecordingProgress(0)
+      }
+
+      mediaRecorder.start()
+
+      // Duración de la grabación en segundos (ej. 5 segundos para Story)
+      const DURATION = 5 
+      const fps = 30
+      const totalFrames = DURATION * fps
+      let currentFrame = 0
+
+      const interval = setInterval(async () => {
+        currentFrame++
+        setRecordingProgress(Math.round((currentFrame / totalFrames) * 100))
+
+        // Renderizar el contenido HTML sobre el canvas
+        const frameCanvas = await html2canvas(container, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+        })
+        ctx.drawImage(frameCanvas, 0, 0, canvas.width, canvas.height)
+
+        if (currentFrame >= totalFrames) {
+          clearInterval(interval)
+          mediaRecorder.stop()
+        }
+      }, 1000 / fps)
+    } catch (err) {
+      console.error('Error durante la grabación de vídeo:', err)
+      alert('Hubo un problema al procesar el vídeo.')
+      setIsExporting(false)
+    }
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-punk-black p-4 text-punk-cream">
@@ -94,9 +202,6 @@ export default function StoryGenerator() {
             <h1 className="mt-4 font-display text-2xl uppercase text-punk-pink">
               Acceso Restringido
             </h1>
-            <p className="mt-1 text-xs text-punk-cream/60">
-              Introduce la clave para acceder al generador de Stories.
-            </p>
           </div>
 
           <div className="mb-4">
@@ -109,14 +214,14 @@ export default function StoryGenerator() {
             />
             {error && (
               <p className="mt-2 text-xs text-red-500">
-                Contraseña incorrecta. Inténtalo de nuevo.
+                Contraseña incorrecta.
               </p>
             )}
           </div>
 
           <button
             type="submit"
-            className="w-full bg-punk-pink p-3 font-display uppercase tracking-wider text-punk-black transition-colors hover:bg-punk-yellow"
+            className="w-full bg-punk-pink p-3 font-display uppercase tracking-wider text-punk-black hover:bg-punk-yellow"
           >
             Entrar
           </button>
@@ -162,20 +267,15 @@ export default function StoryGenerator() {
                   onChange={handleSelectArticle}
                   className="w-full border border-punk-pink/40 bg-punk-black p-3 font-sans text-sm text-punk-cream focus:border-punk-pink focus:outline-none"
                 >
-                  <option value="custom">✏️️ Titular Personalizado (Escribir a mano)</option>
-                  {articles.length > 0 ? (
-                    articles.map((art, idx) => (
-                      <option key={art.slug || idx} value={art.slug || art.title}>
-                        📄 {art.title}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled value="">(Sin entradas detectadas automáticas)</option>
-                  )}
+                  <option value="custom">✏️ Titular Personalizado</option>
+                  {articles.map((art, idx) => (
+                    <option key={art.slug || idx} value={art.slug || art.title}>
+                      📄 {art.title}
+                    </option>
+                  ))}
                 </select>
               </div>
 
-              {/* Categorías exclusivas: MÚSICA y CINE */}
               <div className="mb-4">
                 <label className="mb-1 block font-sans text-xs uppercase tracking-wider text-punk-cream/80">
                   Categoría
@@ -217,29 +317,43 @@ export default function StoryGenerator() {
                   className="w-full cursor-pointer border border-punk-cream/20 bg-punk-black p-2 font-sans text-sm text-punk-cream/60 file:mr-4 file:border-0 file:bg-punk-pink file:px-4 file:py-2 file:font-display file:text-xs file:uppercase file:text-punk-black"
                 />
               </div>
-            </div>
 
-            <div className="border border-punk-cream/10 bg-black/40 p-6 backdrop-blur">
-              <h2 className="mb-2 font-display text-xl uppercase text-punk-yellow">
-                2. Instrucciones
-              </h2>
-              <p className="text-xs leading-relaxed text-punk-cream/70">
-                • Selecciona un artículo o introduce el texto manualmente.<br />
-                • Categorías disponibles: <strong>MÚSICA</strong> y <strong>CINE</strong>.<br />
-                • Respeta la zona segura de Instagram.
-              </p>
+              {/* Botón dinámico según el tipo de archivo subido */}
+              <div className="mt-6 border-t border-punk-cream/10 pt-4">
+                {isVideo ? (
+                  <button
+                    onClick={downloadAsVideo}
+                    disabled={isExporting}
+                    className="w-full bg-punk-yellow py-3 font-display text-sm uppercase tracking-wider text-punk-black transition-all hover:bg-punk-pink disabled:opacity-50"
+                  >
+                    {isExporting
+                      ? `🎬 Grabando Vídeo... (${recordingProgress}%)`
+                      : '🎥 Descargar Story en VÍDEO (MP4)'}
+                  </button>
+                ) : (
+                  <button
+                    onClick={downloadAsImage}
+                    disabled={isExporting}
+                    className="w-full bg-punk-pink py-3 font-display text-sm uppercase tracking-wider text-punk-black transition-all hover:bg-punk-yellow disabled:opacity-50"
+                  >
+                    {isExporting ? 'Generando Imagen...' : '🖼️ Descargar Story en FOTO (JPG)'}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Canvas de previsualización 9:16 */}
-          <div className="flex justify-center lg:col-span-7">
+          <div className="flex flex-col items-center justify-center lg:col-span-7">
             <div
+              ref={storyRef}
               id="story-canvas"
               className="relative aspect-[9/16] w-full max-w-[380px] overflow-hidden border-4 border-punk-pink bg-black shadow-2xl"
             >
               {mediaSrc ? (
                 isVideo ? (
                   <video
+                    ref={videoRef}
                     src={mediaSrc}
                     autoPlay
                     loop
