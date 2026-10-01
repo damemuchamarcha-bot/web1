@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'es_ES',
-    url: 'https://tu-proyecto.vercel.app',
+    url: 'https://damemarcha.com',
     title: 'DAME MARCHA — Revista de Cine y Música',
     description:
       'Revista cultural neo-punk. Cine y música sin filtros: próximos estrenos, crítica, análisis de álbumes y directos.',
