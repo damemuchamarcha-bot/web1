@@ -203,7 +203,11 @@ export function getRecent(currentSlug: string): Article[] {
 }
 
 export function getFeatured(): Article | undefined {
-  return articles.find((article) => article.featured) || articles[0]
+  const featuredArticles = articles.filter((article) => article.featured)
+  if (featuredArticles.length > 0) {
+    return featuredArticles[0]
+  }
+  return articles[0]
 }
 
 // Obtenemos los artículos por sección principal ('cine' o 'musica')
