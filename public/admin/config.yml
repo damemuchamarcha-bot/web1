@@ -2,7 +2,7 @@ backend:
   name: github
   repo: damemuchamarcha-bot/web1
   branch: main
-  base_url: https://web1-eight-swart.vercel.app/
+  base_url: https://web1-eight-swart.vercel.app
   auth_endpoint: api/auth
 
 publish_mode: editorial_workflow
