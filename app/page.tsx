@@ -23,7 +23,7 @@ export default function HomePage() {
         <Marquee />
       </div>
 
-      {/* 2. Lo Último — Layout editorial asimétrico */}
+      {/* 2. Lo Último — Grid asimétrico (¡Ahora primero!) */}
       <section className="mx-auto max-w-7xl px-4 pt-14 sm:px-6">
         <div className="mb-8 flex items-end justify-between border-b-2 border-punk-pink pb-4">
           <h2 className="font-display text-3xl uppercase leading-none tracking-tight text-punk-cream sm:text-4xl">
@@ -34,7 +34,6 @@ export default function HomePage() {
           </span>
         </div>
 
-        {/* Grid asimétrico */}
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 lg:row-span-2">
             <ArticleCard article={lead} size="lg" />
@@ -45,7 +44,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. Buscador interactivo + Filtros por etiqueta */}
+      {/* 3. Buscador interactivo + Filtros por etiqueta (Para explorar todo el archivo) */}
       <section className="mx-auto max-w-7xl px-4 pt-16 sm:px-6">
         <div className="mb-8 border-b-2 border-punk-yellow pb-4">
           <h2 className="font-display text-3xl uppercase leading-none tracking-tight text-punk-cream sm:text-4xl">
