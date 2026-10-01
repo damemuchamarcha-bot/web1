@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server'
 
+// Forzar la ruta para que se ejecute dinámicamente en Vercel
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
@@ -42,7 +46,7 @@ export async function GET(request: Request) {
           <script>
             (function() {
               function receiveMessage(e) {
-                window.opener.postMessage("${postMessageContent}", e.origin);
+                window.opener.postMessage(${JSON.stringify(postMessageContent)}, e.origin);
               }
               window.addEventListener("message", receiveMessage, false);
               window.opener.postMessage("authorizing:github", "*");
