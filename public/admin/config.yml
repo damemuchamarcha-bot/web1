@@ -2,7 +2,7 @@ backend:
   name: github
   repo: damemuchamarcha-bot/web1
   branch: main
-  base_url: https://decap-cms-oauth-orcin.vercel.app
+  base_url: https://damemarcha.com
   auth_endpoint: auth
 
 publish_mode: editorial_workflow
