@@ -9,7 +9,12 @@ export default function HomePage() {
   const featured = getFeatured()
   const recent = getRecent(featured ? featured.slug : '')
   const lead = recent[0]
-  const rest = recent.slice(1, 3)
+  const restRecent = recent.slice(1, 3)
+
+  // Artículos restantes del catálogo (excluyendo el destatado Hero y las 3 novedades iniciales)
+  const remainingArticles = articles.filter(
+    (art) => art.slug !== featured?.slug && !recent.some((r) => r.slug === art.slug)
+  )
 
   if (!featured) return null
 
@@ -24,7 +29,7 @@ export default function HomePage() {
         <Marquee />
       </div>
 
-      {/* 2. Lo último — Las 3 novedades principales */}
+      {/* 2. Lo último — Novedades y resto de artículos */}
       <section className="mx-auto max-w-7xl px-4 pt-14 sm:px-6">
         <div className="mb-8 flex items-end justify-between border-b-2 border-punk-pink pb-4">
           <h2 className="font-display text-3xl uppercase leading-none tracking-tight text-punk-cream sm:text-4xl">
@@ -35,37 +40,31 @@ export default function HomePage() {
           </span>
         </div>
 
+        {/* Rejilla principal con las 3 novedades destacadas */}
         {lead && (
           <div className="grid gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2 lg:row-span-2">
               <ArticleCard article={lead} size="lg" />
             </div>
-            {rest.map((article) => (
+            {restRecent.map((article) => (
               <ArticleCard key={article.slug} article={article} />
             ))}
           </div>
         )}
+
+        {/* Resto de artículos continuados en la misma sección */}
+        {remainingArticles.length > 0 && (
+          <div className="mt-12 border-t border-white/10 pt-8">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {remainingArticles.map((article) => (
+                <ArticleCard key={article.slug} article={article} />
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
-      {/* 3. Archivo completo — Todos los artículos escritos */}
-      <section className="mx-auto max-w-7xl px-4 pt-16 sm:px-6">
-        <div className="mb-8 flex items-end justify-between border-b-2 border-punk-yellow pb-4">
-          <h2 className="font-display text-3xl uppercase leading-none tracking-tight text-punk-cream sm:text-4xl">
-            Todos los artículos <span className="text-punk-yellow">/</span> Catálogo
-          </h2>
-          <span className="font-display text-xs uppercase tracking-widest text-punk-cream/60">
-            {articles.length} publicaciones
-          </span>
-        </div>
-
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {articles.map((article) => (
-            <ArticleCard key={article.slug} article={article} />
-          ))}
-        </div>
-      </section>
-
-      {/* 4. Banner CTA final */}
+      {/* 3. Banner CTA final */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
         <div className="flex flex-col items-center justify-center gap-6 border-2 border-punk-yellow bg-punk-charcoal px-6 py-10 text-center">
           <h3 className="max-w-2xl text-balance font-display text-3xl uppercase leading-none tracking-tight text-punk-cream sm:text-4xl">
