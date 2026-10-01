@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // output: 'export', <--- Desactivado para permitir funciones/APIs dinámicas en Vercel
   typescript: {
     ignoreBuildErrors: true,
   },
