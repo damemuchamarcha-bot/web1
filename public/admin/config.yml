@@ -3,7 +3,7 @@ backend:
   repo: damemuchamarcha-bot/web1
   branch: main
   base_url: https://decap-cms-oauth-provider.vercel.app
-  auth_endpoint: /api/auth
+  auth_endpoint: auth
 
 publish_mode: editorial_workflow
 
