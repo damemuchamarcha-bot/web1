@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Anton, Inter } from 'next/font/google'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
+import { articles } from '@/lib/articles'
 import './globals.css'
 
 const anton = Anton({
@@ -80,7 +81,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${anton.variable} ${inter.variable} font-sans antialiased`}>
-        <SiteHeader />
+        <SiteHeader articles={articles} />
         <main>{children}</main>
         <SiteFooter />
         {process.env.NODE_ENV === 'production' && <Analytics />}
