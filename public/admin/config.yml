@@ -30,17 +30,43 @@ collections:
     create: true
     slug: "{{slug}}"
     fields:
-      - {label: "Título", name: "title", widget: "string"}
-      - {label: "Fecha", name: "date", widget: "datetime"}
-      - {label: "Resumen (Excerpt)", name: "excerpt", widget: "text"}
-      - {label: "Autor", name: "author", widget: "string", default: "Dame Marcha"}
-      - {label: "Sección", name: "section", widget: "select", options: ["musica", "cine"]}
-      - {label: "Categoría", name: "categoryLabel", widget: "string"}
-      - {label: "Imagen de Portada", name: "image", widget: "image"}
-      
-      # Campo para elegir el artículo principal de la portada (Hero)
-      - {label: "¿Destacar en Portada (Hero)?", name: "featured", widget: "boolean", default: false, required: false}
-      
+      - label: "Título"
+        name: "title"
+        widget: "string"
+
+      - label: "Fecha"
+        name: "date"
+        widget: "datetime"
+
+      - label: "Resumen (Excerpt)"
+        name: "excerpt"
+        widget: "text"
+
+      - label: "Autor"
+        name: "author"
+        widget: "string"
+        default: "Dame Marcha"
+
+      - label: "Sección"
+        name: "section"
+        widget: "select"
+        options: ["musica", "cine"]
+
+      - label: "Categoría"
+        name: "categoryLabel"
+        widget: "string"
+
+      - label: "Imagen de Portada"
+        name: "image"
+        widget: "image"
+
+      # Selector manual de Portada para Decap CMS
+      - label: "¿Destacar en Portada (Hero)?"
+        name: "featured"
+        widget: "boolean"
+        default: false
+        required: false
+
       # Campo de galería opcional para TODAS las entradas
       - label: "Galería de fotos (Mosaico)"
         name: "galeria"
@@ -52,4 +78,6 @@ collections:
           name: "image"
           widget: "image"
 
-      - {label: "Contenido del Artículo", name: "body", widget: "markdown"}
+      - label: "Contenido del Artículo"
+        name: "body"
+        widget: "markdown"
