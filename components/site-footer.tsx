@@ -147,6 +147,9 @@ export function SiteFooter() {
             <Link href="/sobre-nosotras" className="hover:text-punk-pink">
               Sobre Nosotras
             </Link>
+            <Link href="/prensa" className="font-semibold text-punk-pink hover:underline">
+              Prensa & Patrocinios
+            </Link>
             <Link href="/aviso-legal" className="hover:text-punk-pink">
               Aviso Legal
             </Link>
