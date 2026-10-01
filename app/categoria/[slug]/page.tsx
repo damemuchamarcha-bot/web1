@@ -46,14 +46,18 @@ export default async function CategoryPage({
   const { slug } = await params
   const category = slug as CategorySlug
   const label = CATEGORY_LABELS[category]
+
   if (!label) notFound()
+
+  // Filtramos los artículos pertenecientes de forma estricta a esta subcategoría
+  const filteredArticles = getByCategory(category)
 
   return (
     <ArticleListing
       eyebrow="Categoría"
       title={label}
       description={DESCRIPTIONS[category]}
-      articles={getByCategory(category)}
+      articles={filteredArticles}
     />
   )
 }
