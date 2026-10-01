@@ -8,13 +8,15 @@ import { ArticleSearch } from '@/components/article-search'
 
 export default function HomePage() {
   const featured = getFeatured()
-  const recent = getRecent(featured.slug)
+  const recent = getRecent(featured ? featured.slug : '')
   const lead = recent[0]
-  const rest = recent.slice(1)
+  const rest = recent.slice(1, 3)
+
+  if (!featured) return null
 
   return (
     <>
-      {/* 1. Hero / Artículo destacado principal */}
+      {/* 1. Hero / Elegido desde Decap CMS (o el más reciente) */}
       <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
         <HeroArticle article={featured} />
       </section>
@@ -23,7 +25,7 @@ export default function HomePage() {
         <Marquee />
       </div>
 
-      {/* 2. Lo Último — Grid asimétrico (¡Ahora primero!) */}
+      {/* 2. Lo Último — Las 3 publicaciones más recientes (excluyendo la portada) */}
       <section className="mx-auto max-w-7xl px-4 pt-14 sm:px-6">
         <div className="mb-8 flex items-end justify-between border-b-2 border-punk-pink pb-4">
           <h2 className="font-display text-3xl uppercase leading-none tracking-tight text-punk-cream sm:text-4xl">
@@ -34,17 +36,19 @@ export default function HomePage() {
           </span>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 lg:row-span-2">
-            <ArticleCard article={lead} size="lg" />
+        {lead && (
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2 lg:row-span-2">
+              <ArticleCard article={lead} size="lg" />
+            </div>
+            {rest.map((article) => (
+              <ArticleCard key={article.slug} article={article} />
+            ))}
           </div>
-          {rest.map((article) => (
-            <ArticleCard key={article.slug} article={article} />
-          ))}
-        </div>
+        )}
       </section>
 
-      {/* 3. Buscador interactivo + Filtros por etiqueta (Para explorar todo el archivo) */}
+      {/* 3. Buscador interactivo / Explora todo el archivo */}
       <section className="mx-auto max-w-7xl px-4 pt-16 sm:px-6">
         <div className="mb-8 border-b-2 border-punk-yellow pb-4">
           <h2 className="font-display text-3xl uppercase leading-none tracking-tight text-punk-cream sm:text-4xl">
