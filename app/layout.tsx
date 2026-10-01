@@ -2,7 +2,6 @@ import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata, Viewport } from 'next'
 import { Anton, Inter } from 'next/font/google'
-import Script from 'next/script'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { articles } from '@/lib/articles'
@@ -69,6 +68,9 @@ export const metadata: Metadata = {
     shortcut: '/icon.png',
     apple: '/icon.png',
   },
+  other: {
+    'google-adsense-account': 'ca-pub-9115589316233395',
+  },
 }
 
 export const viewport: Viewport = {
@@ -92,12 +94,6 @@ export default function RootLayout({
             <SpeedInsights />
           </>
         )}
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9115589316233395"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
       </body>
     </html>
   )
