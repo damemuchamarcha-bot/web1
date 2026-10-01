@@ -4,7 +4,6 @@ import { getFeatured, getRecent, articles } from '@/lib/articles'
 import { HeroArticle } from '@/components/hero-article'
 import { ArticleCard } from '@/components/article-card'
 import { Marquee } from '@/components/marquee'
-import { ArticleSearch } from '@/components/article-search'
 
 export default function HomePage() {
   const featured = getFeatured()
@@ -16,7 +15,7 @@ export default function HomePage() {
 
   return (
     <>
-      {/* 1. Hero / Elegido desde Decap CMS (o el más reciente) */}
+      {/* 1. Hero / Elegido desde Decap CMS */}
       <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
         <HeroArticle article={featured} />
       </section>
@@ -25,11 +24,11 @@ export default function HomePage() {
         <Marquee />
       </div>
 
-      {/* 2. Lo Último — Las 3 publicaciones más recientes (excluyendo la portada) */}
+      {/* 2. Lo último — Las 3 novedades principales */}
       <section className="mx-auto max-w-7xl px-4 pt-14 sm:px-6">
         <div className="mb-8 flex items-end justify-between border-b-2 border-punk-pink pb-4">
           <h2 className="font-display text-3xl uppercase leading-none tracking-tight text-punk-cream sm:text-4xl">
-            Lo último <span className="text-punk-pink">/</span> Noticias y reseñas
+            Lo último <span className="text-punk-pink">/</span> Novedades
           </h2>
           <span className="hidden font-display text-sm uppercase tracking-[0.2em] text-punk-yellow sm:block">
             Cine · Música
@@ -48,18 +47,25 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* 3. Buscador interactivo / Explora todo el archivo */}
+      {/* 3. Archivo completo — Todos los artículos escritos */}
       <section className="mx-auto max-w-7xl px-4 pt-16 sm:px-6">
-        <div className="mb-8 border-b-2 border-punk-yellow pb-4">
+        <div className="mb-8 flex items-end justify-between border-b-2 border-punk-yellow pb-4">
           <h2 className="font-display text-3xl uppercase leading-none tracking-tight text-punk-cream sm:text-4xl">
-            Buscador <span className="text-punk-yellow">/</span> Explora el archivo
+            Todos los artículos <span className="text-punk-yellow">/</span> Catálogo
           </h2>
+          <span className="font-display text-xs uppercase tracking-widest text-punk-cream/60">
+            {articles.length} publicaciones
+          </span>
         </div>
 
-        <ArticleSearch articles={articles} />
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {articles.map((article) => (
+            <ArticleCard key={article.slug} article={article} />
+          ))}
+        </div>
       </section>
 
-      {/* 4. Banner final CTA */}
+      {/* 4. Banner CTA final */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
         <div className="flex flex-col items-center justify-center gap-6 border-2 border-punk-yellow bg-punk-charcoal px-6 py-10 text-center">
           <h3 className="max-w-2xl text-balance font-display text-3xl uppercase leading-none tracking-tight text-punk-cream sm:text-4xl">
