@@ -70,6 +70,7 @@ export const metadata: Metadata = {
   },
   other: {
     'google-adsense-account': 'ca-pub-9115589316233395',
+    'publisuites-verify-code': 'aHR0cHM6Ly93d3cuZGFtZW1hcmNoYS5jb20=',
   },
 }
 
