@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Menu, X, ChevronDown } from 'lucide-react'
+import { Menu, X, ChevronDown, Search } from 'lucide-react'
+import { Article } from '@/lib/articles'
 
 type NavChild = { label: string; href: string }
 type NavItem = { label: string; href: string; children?: NavChild[] }
@@ -29,14 +30,40 @@ const NAV: NavItem[] = [
   { label: 'Sobre Nosotras', href: '/sobre-nosotras' },
 ]
 
-export function SiteHeader() {
+interface SiteHeaderProps {
+  articles?: Article[]
+}
+
+export function SiteHeader({ articles = [] }: SiteHeaderProps) {
   const [open, setOpen] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
+  
+  // Estado para la búsqueda
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [query, setQuery] = useState('')
+
+  // Filtrado de artículos en tiempo real
+  const filteredArticles = query.trim()
+    ? articles.filter(
+        (art) =>
+          art.title.toLowerCase().includes(query.toLowerCase()) ||
+          art.excerpt.toLowerCase().includes(query.toLowerCase()) ||
+          art.categoryLabel.toLowerCase().includes(query.toLowerCase())
+      )
+    : []
 
   return (
     <header className="sticky top-0 z-50 border-b-2 border-punk-pink bg-punk-black">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-        <Link href="/" className="group flex items-baseline gap-1" onClick={() => setOpen(false)}>
+        {/* BRAND LOGO */}
+        <Link
+          href="/"
+          className="group flex items-baseline gap-1"
+          onClick={() => {
+            setOpen(false)
+            setSearchOpen(false)
+          }}
+        >
           <span className="font-display text-2xl uppercase leading-none tracking-tight text-punk-cream sm:text-3xl">
             Dame
           </span>
@@ -45,47 +72,122 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        {/* Desktop nav */}
-        <nav className="hidden items-center gap-1 md:flex">
-          {NAV.map((item) => (
-            <div key={item.label} className="group relative">
-              <Link
-                href={item.href}
-                className="flex items-center gap-1 px-3 py-2 font-display text-sm uppercase tracking-wide text-punk-cream transition-colors hover:text-punk-pink"
-              >
-                {item.label}
-                {item.children && <ChevronDown className="size-3.5" aria-hidden="true" />}
-              </Link>
-              {item.children && (
-                <div className="invisible absolute left-0 top-full min-w-56 border-2 border-punk-pink bg-punk-black opacity-0 transition-all group-hover:visible group-hover:opacity-100">
-                  {item.children.map((child) => (
-                    <Link
-                      key={child.href}
-                      href={child.href}
-                      className="block border-b border-white/10 px-4 py-3 text-sm font-medium text-punk-cream transition-colors last:border-b-0 hover:bg-punk-pink hover:text-punk-black"
-                    >
-                      {child.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </nav>
+        {/* DESKTOP NAV + SEARCH TRIGGER */}
+        <div className="flex items-center gap-4">
+          <nav className="hidden items-center gap-1 md:flex">
+            {NAV.map((item) => (
+              <div key={item.label} className="group relative">
+                <Link
+                  href={item.href}
+                  className="flex items-center gap-1 px-3 py-2 font-display text-sm uppercase tracking-wide text-punk-cream transition-colors hover:text-punk-pink"
+                >
+                  {item.label}
+                  {item.children && <ChevronDown className="size-3.5" aria-hidden="true" />}
+                </Link>
+                {item.children && (
+                  <div className="invisible absolute left-0 top-full min-w-56 border-2 border-punk-pink bg-punk-black opacity-0 transition-all group-hover:visible group-hover:opacity-100">
+                    {item.children.map((child) => (
+                      <Link
+                        key={child.href}
+                        href={child.href}
+                        className="block border-b border-white/10 px-4 py-3 text-sm font-medium text-punk-cream transition-colors last:border-b-0 hover:bg-punk-pink hover:text-punk-black"
+                      >
+                        {child.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </nav>
 
-        {/* Mobile toggle */}
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="flex size-10 items-center justify-center border-2 border-punk-cream text-punk-cream transition-colors hover:border-punk-pink hover:text-punk-pink md:hidden"
-          aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
-          aria-expanded={open}
-        >
-          {open ? <X className="size-6" /> : <Menu className="size-6" />}
-        </button>
+          {/* BOTÓN LUPA PARA ABRIR BUSCADOR */}
+          <button
+            type="button"
+            onClick={() => {
+              setSearchOpen((v) => !v)
+              setOpen(false)
+            }}
+            className="flex size-10 items-center justify-center border-2 border-punk-cream text-punk-cream transition-colors hover:border-punk-yellow hover:text-punk-yellow"
+            aria-label={searchOpen ? 'Cerrar búsqueda' : 'Abrir búsqueda'}
+          >
+            {searchOpen ? <X className="size-5 text-punk-pink" /> : <Search className="size-5" />}
+          </button>
+
+          {/* TOGGLE MÓVIL */}
+          <button
+            type="button"
+            onClick={() => {
+              setOpen((v) => !v)
+              setSearchOpen(false)
+            }}
+            className="flex size-10 items-center justify-center border-2 border-punk-cream text-punk-cream transition-colors hover:border-punk-pink hover:text-punk-pink md:hidden"
+            aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={open}
+          >
+            {open ? <X className="size-6" /> : <Menu className="size-6" />}
+          </button>
+        </div>
       </div>
 
-      {/* Mobile drawer */}
+      {/* DESPLEGABLE DE BÚSQUEDA FLOTANTE */}
+      {searchOpen && (
+        <div className="border-t-2 border-punk-yellow bg-punk-charcoal px-4 py-6 shadow-2xl sm:px-6">
+          <div className="mx-auto max-w-3xl">
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="BUSCAR EN EL ARCHIVO (TÍTULO, ARTISTA, CATEGORÍA)..."
+                className="w-full border-2 border-punk-yellow bg-punk-black px-4 py-3 font-display text-sm tracking-wider text-punk-cream placeholder:text-punk-cream/40 focus:border-punk-pink focus:outline-none"
+                autoFocus
+              />
+              {query && (
+                <button
+                  onClick={() => setQuery('')}
+                  className="absolute right-3 text-punk-cream/60 hover:text-punk-cream"
+                >
+                  <X className="size-4" />
+                </button>
+              )}
+            </div>
+
+            {/* RESULTADOS DE LA BÚSQUEDA */}
+            {query.trim() !== '' && (
+              <div className="mt-4 max-h-80 overflow-y-auto border border-punk-yellow/30 bg-punk-black p-2">
+                {filteredArticles.length > 0 ? (
+                  <div className="flex flex-col gap-2">
+                    {filteredArticles.map((art) => (
+                      <Link
+                        key={art.slug}
+                        href={`/articulos/${art.slug}`}
+                        onClick={() => {
+                          setSearchOpen(false)
+                          setQuery('')
+                        }}
+                        className="flex items-center justify-between border border-transparent p-3 hover:border-punk-pink hover:bg-punk-charcoal transition-colors"
+                      >
+                        <div>
+                          <span className="font-display text-xs uppercase text-punk-pink">{art.categoryLabel}</span>
+                          <h4 className="font-display text-sm uppercase text-punk-cream">{art.title}</h4>
+                        </div>
+                        <span className="font-display text-xs text-punk-yellow">{art.date}</span>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="p-4 text-center font-display text-xs uppercase tracking-wider text-punk-cream/50">
+                    No se encontraron artículos con &quot;{query}&quot;
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* MOBILE DRAWER NAV */}
       {open && (
         <nav className="border-t-2 border-punk-pink bg-punk-black md:hidden">
           {NAV.map((item) => (
