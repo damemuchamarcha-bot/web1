@@ -52,9 +52,22 @@ collections:
         widget: "select"
         options: ["musica", "cine"]
 
+      # Subcategoría con desplegable y libertad para teclear una nueva
+      - label: "Subcategoría"
+        name: "category"
+        widget: "select"
+        allow_add: true
+        options:
+          - { label: "Análisis de Cine", value: "analisis-de-cine" }
+          - { label: "Crítica de Cine", value: "critica-de-cine" }
+          - { label: "Próximos Estrenos", value: "proximos-estrenos" }
+          - { label: "Análisis de Álbumes", value: "analisis-de-albumes" }
+          - { label: "Directos", value: "directos" }
+
       - label: "Categoría"
         name: "categoryLabel"
         widget: "string"
+        required: false
 
       - label: "Imagen de Portada"
         name: "image"
