@@ -10,6 +10,17 @@ function sanitizeImageUrl(url?: string): string {
   return url.replace(/ucarecdn\.net/g, 'ucarecdn.com')
 }
 
+// Helper para convertir cualquier representación del valor 'featured' a booleano estricto
+function parseBoolean(value: unknown): boolean {
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase()
+    return normalized === 'true' || normalized === 'yes' || normalized === '1'
+  }
+  if (typeof value === 'number') return value === 1
+  return false
+}
+
 // Subcategorías válidas
 export type CategorySlug =
   | 'analisis-de-cine'
@@ -165,7 +176,7 @@ export function getAllArticles(): Article[] {
         timeAgo: data.timeAgo || 'Reciente',
         readingTime: data.readingTime || '5 min de lectura',
         image: rawImage,
-        featured: Boolean(data.featured),
+        featured: parseBoolean(data.featured),
         spotify: rawSpotify || undefined,
         youtube: rawYoutube || undefined,
         gallery: formattedGallery,
