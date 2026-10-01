@@ -141,9 +141,10 @@ export function getAllArticles(): Article[] {
         ? content.split('\n\n').map((p) => sanitizeImageUrl(p.trim())).filter(Boolean)
         : ['Contenido próximamente...']
 
+      // Detecta la categoría seleccionada desde Decap CMS
       const category = (data.category || 'analisis-de-albumes') as CategorySlug
       
-      // Asigna la sección automáticamente según la subcategoría si no viene definida en el archivo markdown
+      // Asigna la sección automáticamente según la subcategoría si no viene definida en el markdown
       const section = data.section || CATEGORY_TO_SECTION[category] || 'cine'
 
       // Guardar fecha ISO limpia para ordenación precisa
@@ -179,12 +180,14 @@ export function getAllArticles(): Article[] {
 
 export const articles = getAllArticles()
 
+// --- FUNCIONES DE BÚSQUEDA Y FILTRADO ---
+
 export function getArticle(slug: string): Article | undefined {
   return articles.find((article) => article.slug === slug)
 }
 
 export function getRecent(currentSlug: string): Article[] {
-  // Excluimos la entrada marcada en el Hero y devolvemos exactamente las 3 últimas
+  // Excluimos la entrada marcada en el Hero y devolvemos las 3 más recientes
   return articles.filter((article) => article.slug !== currentSlug).slice(0, 3)
 }
 
@@ -192,10 +195,25 @@ export function getFeatured(): Article | undefined {
   return articles.find((article) => article.featured) || articles[0]
 }
 
+// Obtenemos los artículos por sección principal ('cine' o 'musica')
 export function getBySection(section: string): Article[] {
-  return articles.filter((article) => article.section.toLowerCase() === section.toLowerCase())
+  const normalized = section.toLowerCase().trim()
+  return articles.filter(
+    (article) => article.section.toLowerCase().trim() === normalized
+  )
 }
 
-export function getByCategory(category: string): Article[] {
-  return articles.filter((article) => article.category.toLowerCase() === category.toLowerCase())
+// Obtenemos los artículos por subcategoría ('analisis-de-cine', 'analisis-de-albumes', etc.)
+export function getByCategory(categorySlug: string): Article[] {
+  const normalized = categorySlug.toLowerCase().trim()
+  return articles.filter((article) => {
+    const artCategory = article.category.toLowerCase().trim()
+    const artLabel = article.categoryLabel.toLowerCase().replace(/\s+/g, '-').trim()
+    return artCategory === normalized || artLabel === normalized
+  })
 }
+
+// Alias para mantener compatibilidad con las vistas
+export const getArticlesBySection = getBySection
+export const getArticlesByCategory = getByCategory
+export const getArticlesBySubCategory = getByCategory
