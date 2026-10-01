@@ -20,6 +20,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://damemarcha.com'),
   title: {
     default: 'DAME MARCHA — Revista de Cine y Música',
     template: '%s | DAME MARCHA',
@@ -37,7 +38,6 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: 'Dame Marcha' }],
   creator: 'Dame Marcha',
-  generator: 'v0.app',
   openGraph: {
     type: 'website',
     locale: 'es_ES',
