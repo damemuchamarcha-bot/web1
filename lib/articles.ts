@@ -178,7 +178,8 @@ export function getArticle(slug: string): Article | undefined {
 }
 
 export function getRecent(currentSlug: string): Article[] {
-  return articles.filter((article) => article.slug !== currentSlug)
+  // Excluimos la entrada marcada en el Hero y devolvemos exactamente las 3 últimas
+  return articles.filter((article) => article.slug !== currentSlug).slice(0, 3)
 }
 
 export function getFeatured(): Article | undefined {
