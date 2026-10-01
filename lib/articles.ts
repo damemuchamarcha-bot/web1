@@ -47,6 +47,7 @@ export interface Article {
   categoryLabel: string
   author: string
   date: string
+  rawDate: string
   timeAgo: string
   readingTime: string
   image: string
@@ -145,6 +146,9 @@ export function getAllArticles(): Article[] {
       // Asigna la sección automáticamente según la subcategoría si no viene definida en el archivo markdown
       const section = data.section || CATEGORY_TO_SECTION[category] || 'cine'
 
+      // Guardar fecha ISO limpia para ordenación precisa
+      const isoDate = data.date ? new Date(data.date).toISOString() : new Date().toISOString()
+
       return {
         slug,
         title: data.title,
@@ -153,6 +157,7 @@ export function getAllArticles(): Article[] {
         category,
         categoryLabel: data.categoryLabel || CATEGORY_LABELS[category] || 'Artículo',
         author: data.author || 'Redacción',
+        rawDate: isoDate,
         date: data.date
           ? new Date(data.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()
           : '21 SEPT 2026',
@@ -168,7 +173,8 @@ export function getAllArticles(): Article[] {
     })
     .filter((article): article is Article => article !== null)
 
-  return allArticlesData
+  // ORDEN CRÍTICO: Ordena estrictamente del más reciente al más antiguo según su fecha real
+  return allArticlesData.sort((a, b) => new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime())
 }
 
 export const articles = getAllArticles()
