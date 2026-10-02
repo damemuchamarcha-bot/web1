@@ -10,7 +10,7 @@ categoryLabel: Noticia
 image: https://3ejmd55n1g.ucarecd.net/976f9e3d-72c8-4fb1-92a1-82ad4c0478a7/-/crop/1920x821/0,129/-/preview/
 featured: false
 ---
-Samuraï ha comenzado el camino de su nuevo álbum de estudio **"AMARRE"** con un adelanto, “Fábula”. Tras cerrar el ciclo del "**El Silencio del Ruido"**, los anuncios que ha hecho la artista por redes sociales nos hacen imaginar cómo será su próxima era.
+Samuraï ha comenzado el camino de su nuevo álbum de estudio **"AMARRE"** con un adelanto, “Fábula”. Tras cerrar el ciclo del **"El Silencio del Ruido"**, los anuncios que ha hecho la artista por redes sociales nos hacen imaginar cómo será su próxima era.
 
 El tema aborda la traición desde la venganza y funciona también como una declaración de intenciones sonora, marcando el punto de partida de un universo conceptual que irá desvelando a lo largo de los próximos meses.
 
@@ -52,7 +52,7 @@ Este adelanto parece estar lleno de historias puramente literarias, con escenari
 
 <https://youtu.be/o5xMaSvfqNY>
 
-“Fábula” también parece funcionar como una puerta de entrada al universo de **AMARRE**. Si las próximas canciones siguen esta línea, podemos estar ante un álbum mucho más centrado en contar historias y construir personajes.
+“Fábula” también parece funcionar como una puerta de entrada al universo de **"AMARRE"**. Si las próximas canciones siguen esta línea, podemos estar ante un álbum mucho más centrado en contar historias y construir personajes.
 
 Quizá, quién sabe, esta nueva etapa pueda crear Samuraï en una nueva Rhiannon, como en Fleetwood Mac.
 
