@@ -1,7 +1,7 @@
 ---
 title: " La otra cara de lo nuevo de Duckwrth:  A.A.F. B - Sides"
 date: 2026-10-01T20:24:00.000+02:00
-excerpt: Así es como es el nuevo lanzamiento de Duckwrth
+excerpt: El nuevo lanzamiento de Duckwrth
 author: Marta Menjíbar
 section: musica
 category: analisis-de-albumes
