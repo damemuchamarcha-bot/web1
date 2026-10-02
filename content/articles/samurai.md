@@ -17,11 +17,17 @@ La artista comenta por Instagram sobre cómo serán las próximas canciones de s
 
 > "Hay algunas canciones que son luciérnagas, pequeñas guías a las que volver cuando me pierdo. Otras son fábulas cuya moraleja sigo buscando".
 
+<https://www.instagram.com/p/DdzM6jsIqHY/?utm_source=ig_web_copy_link&stkn=MzRlODBiNWFlZA==>
+
 ## Entre el western y el rock
 
 **“Fábula”** se aleja un poco de la carretera tal y como la conocemos en **"El Silencio del Ruido"**: fría, fuerte, nostálgica. Aquí se siente más como una conducción ligera en un día soleado, camino del campo, disfrutando de la naturaleza.
 
+[https://open.spotify.com/intl-es/album/3CB6CuXulfgqnVNSpfSEfT](https://open.spotify.com/intl-es/album/3CB6CuXulfgqnVNSpfSEfT?si=_GwHpUKrQA-dSDj20rkHZg)
+
 Desde el principio destaca un groove de break, con el bajo y la voz como protagonistas. En cierta manera, nos recuerda a la canción “You Know I'm No Good”, de Amy Winehouse.
+
+<https://open.spotify.com/intl-es/track/4zQuwW24dweWcaX0fEJkP2>
 
 Y, aun así, no pierde ese estilo rock de Samuraï que aparece en el halftime del final. Es precisamente cuando vemos una vuelta a los sonidos de su último disco, pero un poco más cálidos.
 
@@ -49,6 +55,10 @@ Este adelanto parece estar lleno de historias puramente literarias, con escenari
 
 Quizá, quién sabe, esta nueva etapa pueda crear Samuraï en una nueva Rhiannon, como en Fleetwood Mac.
 
+[https://open.spotify.com/intl-es/track/05oETzWbd4SI33qK2gbJfR](https://open.spotify.com/intl-es/track/05oETzWbd4SI33qK2gbJfR?si=fd13e211fd1a4bd7)
+
 ## El equipo detrás de “Fábula”
 
 En esta canción trabajan Alejandro Moreno, como percusionista y arreglista de grabación; Pablo Fergus, como arreglista de grabación; Pablo Stipicic, como productor; y Nathan Boddy, como ingeniero de grabación.
+
+<https://open.spotify.com/intl-es/track/6AJpmsldHFaBUkjKV0DX9j?si=a9ed2fd69fac406a>
