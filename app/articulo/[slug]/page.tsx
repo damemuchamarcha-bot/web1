@@ -163,7 +163,7 @@ export default async function ArticlePage({
   }
 
   return (
-    <article>
+    <article lang="es">
       {/* Barra de progreso de lectura */}
       <ReadingProgressBar />
 
@@ -230,6 +230,16 @@ export default async function ArticlePage({
           {article.body.map((para, i) => {
             const trimmed = para.trim()
 
+            // Detectar alineación especificada opcionalmente
+            let alignmentClass = 'text-left'
+            if (trimmed.startsWith('->') && trimmed.endsWith('<-')) {
+              alignmentClass = 'text-center'
+            } else if (trimmed.startsWith('->')) {
+              alignmentClass = 'text-right'
+            } else if (trimmed.startsWith('=')) {
+              alignmentClass = 'text-justify'
+            }
+
             // 1. Revisa si la línea es un enlace directo de Spotify/YouTube/Instagram
             const mediaEmbed = renderEmbeddedMedia(trimmed)
             if (mediaEmbed) {
@@ -242,17 +252,17 @@ export default async function ArticlePage({
               return (
                 <div
                   key={i}
-                  className="my-4 text-pretty text-lg leading-[1.8] text-punk-cream/85"
+                  className={`my-4 text-pretty text-lg leading-[1.8] text-punk-cream/85 ${alignmentClass}`}
                   dangerouslySetInnerHTML={{ __html: para }}
                 />
               )
             }
 
-            // 3. Párrafo estándar en Markdown
+            // 3. Párrafo estándar en Markdown con alineación, encabezados y citas
             return (
               <div
                 key={i}
-                className={`text-pretty text-lg leading-[1.8] text-punk-cream/85 ${
+                className={`text-pretty text-lg leading-[1.8] text-punk-cream/85 ${alignmentClass} ${
                   i === 0
                     ? 'first-letter:float-left first-letter:mr-3 first-letter:font-display first-letter:text-6xl first-letter:leading-[0.8] first-letter:text-punk-pink'
                     : ''
@@ -260,6 +270,22 @@ export default async function ArticlePage({
               >
                 <ReactMarkdown
                   components={{
+                    // --- ENCABEZADOS INTEGRADOS ---
+                    h1: ({ node, ...props }) => (
+                      <h1 className="mt-8 mb-4 font-display text-3xl sm:text-4xl uppercase tracking-tight text-punk-cream border-b border-white/10 pb-2" {...props} />
+                    ),
+                    h2: ({ node, ...props }) => (
+                      <h2 className="mt-7 mb-3 font-display text-2xl sm:text-3xl uppercase tracking-tight text-punk-yellow" {...props} />
+                    ),
+                    h3: ({ node, ...props }) => (
+                      <h3 className="mt-6 mb-2 font-display text-xl sm:text-2xl uppercase tracking-tight text-punk-pink" {...props} />
+                    ),
+
+                    // --- CITAS (BLOCKQUOTES) INTEGRADAS ---
+                    blockquote: ({ node, ...props }) => (
+                      <blockquote className="my-6 border-l-4 border-punk-pink bg-punk-black/40 px-6 py-4 italic text-punk-cream/90 rounded-r shadow-inner" {...props} />
+                    ),
+
                     strong: ({ node, ...props }) => (
                       <strong className="font-bold text-punk-pink" {...props} />
                     ),
