@@ -1,97 +1,81 @@
-backend:
-  name: github
-  repo: damemuchamarcha-bot/web1
-  branch: main
-  site_domain: www.damemarcha.com
-  base_url: https://www.damemarcha.com
-  auth_endpoint: api/auth
+// /api/auth.js (En la raíz del proyecto)
 
-publish_mode: editorial_workflow
+export default async function handler(req, res) {
+  const { code } = req.query
 
-media_library:
-  name: uploadcare
-  config:
-    publicKey: "0c8ace87549de321b182"
-    useFullUrl: true    # <--- ESTO ES LO CLAVE: obliga a guardar "https://ucarecdn.com/..."
-    tabs: "file url camera gdrive"
-    effects: "crop,rotate"
-    settings:
-      crop: "21:9, 16:9, 4:3, 1:1, free"
+  // 1. Redirección inicial a GitHub si no hay código
+  if (!code) {
+    const client_id = process.env.OAUTH_GITHUB_CLIENT_ID
+    const host = req.headers.host
+    const protocol = req.headers['x-forwarded-proto'] || 'https'
+    const redirect_uri = `${protocol}://${host}/api/auth`
 
-media_folder: "public/uploads"
-public_folder: "/uploads"
+    return res.redirect(
+      `https://github.com/login/oauth/authorize?client_id=${client_id}&scope=repo&redirect_uri=${encodeURIComponent(
+        redirect_uri
+      )}`
+    )
+  }
 
-slug:
-  clean_accents: true
+  // 2. Intercambio de código por el Access Token de GitHub
+  try {
+    const response = await fetch('https://github.com/login/oauth/access_token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        client_id: process.env.OAUTH_GITHUB_CLIENT_ID,
+        client_secret: process.env.OAUTH_GITHUB_CLIENT_SECRET,
+        code,
+      }),
+    })
 
-collections:
-  - name: "articles"
-    label: "Artículos"
-    folder: "content/articles"
-    create: true
-    slug: "{{slug}}"
-    fields:
-      - label: "Título"
-        name: "title"
-        widget: "string"
+    const data = await response.json()
+    const token = data.access_token
 
-      - label: "Fecha"
-        name: "date"
-        widget: "datetime"
+    const content = token
+      ? `authorization:github:success:${JSON.stringify({ token, provider: 'github' })}`
+      : `authorization:github:error:${JSON.stringify(data)}`
 
-      - label: "Resumen (Excerpt)"
-        name: "excerpt"
-        widget: "text"
+    // Script con comunicación bidireccional estricta para Decap CMS
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Autenticando...</title>
+        </head>
+        <body>
+          <script>
+            (function() {
+              function receiveMessage(e) {
+                console.log("Origen recibido:", e.origin);
+                // Enviamos el token en respuesta al mensaje handshake del CMS
+                window.opener.postMessage(${JSON.stringify(content)}, "*");
+              }
 
-      - label: "Autor"
-        name: "author"
-        widget: "string"
-        default: "Dame Marcha"
+              window.addEventListener("message", receiveMessage, false);
 
-      - label: "Sección"
-        name: "section"
-        widget: "select"
-        options: ["musica", "cine"]
+              // 1. Notificar al CMS que la autorización ha comenzado
+              window.opener.postMessage("authorizing:github", "*");
 
-      # Subcategoría con desplegable y libertad para teclear una nueva
-      - label: "Subcategoría"
-        name: "category"
-        widget: "select"
-        allow_add: true
-        options:
-          - { label: "Análisis de Cine", value: "analisis-de-cine" }
-          - { label: "Crítica de Cine", value: "critica-de-cine" }
-          - { label: "Próximos Estrenos", value: "proximos-estrenos" }
-          - { label: "Análisis de Álbumes", value: "analisis-de-albumes" }
-          - { label: "Directos", value: "directos" }
+              // 2. Enviar el resultado directamente por si el handshake ya se produjo
+              setTimeout(function() {
+                window.opener.postMessage(${JSON.stringify(content)}, "*");
+              }, 1000);
+            })();
+          </script>
+          <p style="font-family: sans-serif; text-align: center; margin-top: 20px;">
+            Autenticación completada. Cargando panel de administración...
+          </p>
+        </body>
+      </html>
+    `
 
-      - label: "Categoría"
-        name: "categoryLabel"
-        widget: "string"
-        required: false
-
-      - label: "Imagen de Portada"
-        name: "image"
-        widget: "image"
-
-      # Selector manual de Portada para Decap CMS
-      - label: "¿Destacar en Portada (Hero)?"
-        name: "featured"
-        widget: "boolean"
-        default: false
-        required: false
-
-      # Campo de galería opcional para TODAS las entradas
-      - label: "Galería de fotos (Mosaico)"
-        name: "galeria"
-        widget: "list"
-        required: false
-        hint: "Sube las fotos que quieras añadir a la galería del artículo"
-        field:
-          label: "Imagen"
-          name: "image"
-          widget: "image"
-
-      - label: "Contenido del Artículo"
-        name: "body"
-        widget: "markdown"
+    res.setHeader('Content-Type', 'text/html; charset=utf-8')
+    return res.status(200).send(html)
+  } catch (error) {
+    return res.status(500).json({ error: 'Error al procesar la autenticación' })
+  }
+}
