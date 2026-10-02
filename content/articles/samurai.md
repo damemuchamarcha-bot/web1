@@ -1,6 +1,6 @@
 ---
 title: "Entre vaqueros y brujas: Fábula"
-date: 2026-10-02T15:17:00.000+02:00
+date: 2026-10-02T18:24:00.000+02:00
 excerpt: Así es como se escucha el adelanto de la nueva era de la artista
   madrileña Samuraï
 author: Marta Menjíbar
@@ -16,7 +16,7 @@ El tema aborda la traición desde la venganza y funciona también como una decla
 
 La artista comenta por Instagram sobre cómo serán las próximas canciones de su álbum:
 
-> "Hay algunas canciones que son luciérnagas, pequeñas guías a las que volver cuando me pierdo. Otras son fábulas cuya moraleja sigo buscando".
+> *"Hay algunas canciones que son luciérnagas, pequeñas guías a las que volver cuando me pierdo. Otras son fábulas cuya moraleja sigo buscando".*
 
 <https://www.instagram.com/p/DdzM6jsIqHY/?utm_source=ig_web_copy_link&stkn=MzRlODBiNWFlZA==>
 
@@ -42,9 +42,9 @@ La historia se construye alrededor de una moraleja tan clara como inevitable: qu
 
 El estribillo se repite como si fuera una **maldición** y una **sentencia**:
 
-> “Tu condena será
+> *“Tu condena será
 > no olvidarte de su nombre
-> por el resto de los días.”
+> por el resto de los días.”*
 
 Esto resulta especialmente interesante porque coloca a Samuraï como narradora de la historia, mientras que la protagonista, en este caso, es la bruja. La canción convierte así una historia de traición en una especie de fábula oscura donde el castigo no termina con la muerte, sino que continúa en la memoria.
 
