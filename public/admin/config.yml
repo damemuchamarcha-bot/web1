@@ -2,8 +2,8 @@ backend:
   name: github
   repo: damemuchamarcha-bot/web1
   branch: main
-  site_domain: damemarcha.com
-  base_url: https://damemarcha.com
+  site_domain: www.damemarcha.com
+  base_url: https://www.damemarcha.com
   auth_endpoint: api/auth
 
 publish_mode: editorial_workflow
