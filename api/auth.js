@@ -3,9 +3,10 @@
 export default async function handler(req, res) {
   const { code } = req.query
 
+  // 1. Redirigir a GitHub si no hay código
   if (!code) {
     const client_id = process.env.OAUTH_GITHUB_CLIENT_ID
-    const redirect_uri = 'https://damemarcha.com/api/auth'
+    const redirect_uri = `https://${req.headers.host}/api/auth`
     return res.redirect(
       `https://github.com/login/oauth/authorize?client_id=${client_id}&scope=repo&redirect_uri=${encodeURIComponent(
         redirect_uri
@@ -13,6 +14,7 @@ export default async function handler(req, res) {
     )
   }
 
+  // 2. Intercambiar el código por el Access Token de GitHub
   try {
     const response = await fetch('https://github.com/login/oauth/access_token', {
       method: 'POST',
@@ -30,30 +32,43 @@ export default async function handler(req, res) {
     const data = await response.json()
     const token = data.access_token
 
-    const postMessageContent = token
-      ? `authorization:github:success:${JSON.stringify({ token, provider: 'github' })}`
-      : `authorization:github:error:${JSON.stringify(data)}`
-
+    // Script para enviar el token a Decap CMS y cerrar el popup automáticamente
     const html = `
       <!DOCTYPE html>
       <html>
+        <head>
+          <title>Autenticando...</title>
+        </head>
         <body>
           <script>
             (function() {
               function receiveMessage(e) {
-                window.opener.postMessage(${JSON.stringify(postMessageContent)}, e.origin);
+                console.log("Mensaje de origen recibido:", e.origin);
               }
               window.addEventListener("message", receiveMessage, false);
-              window.opener.postMessage("authorizing:github", "*");
+
+              const token = ${JSON.stringify(token || '')};
+              const error = ${JSON.stringify(data.error ? data : null)};
+
+              if (token) {
+                const message = "authorization:github:success:" + JSON.stringify({ token: token, provider: "github" });
+                window.opener.postMessage(message, "*");
+                window.close();
+              } else {
+                const message = "authorization:github:error:" + JSON.stringify(error);
+                window.opener.postMessage(message, "*");
+              }
             })();
           </script>
+          <p>Autenticación completada. Esta ventana se cerrará automáticamente...</p>
         </body>
       </html>
     `
 
-    res.setHeader('Content-Type', 'text/html')
+    res.setHeader('Content-Type', 'text/html; charset=utf-8')
     return res.status(200).send(html)
   } catch (error) {
-    return res.status(500).json({ error: 'Error al autenticar' })
+    console.error('Error durante la autenticación:', error)
+    return res.status(500).json({ error: 'Error interno en el servidor de autenticación' })
   }
 }
