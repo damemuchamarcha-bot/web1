@@ -292,15 +292,21 @@ export default async function ArticlePage({
                     em: ({ node, ...props }) => (
                       <em className="italic text-punk-cream" {...props} />
                     ),
+                    // Usamos <span> en lugar de <p> para prevenir errores de anidamiento HTML e hidratación si hay encabezados/bloques dentro
                     p: ({ node, children, ...props }) => (
-                      <p className="m-0 inline" {...props}>
+                      <span className="m-0 inline" {...props}>
                         {children}
-                      </p>
+                      </span>
                     ),
                     a: ({ node, href, children, ...props }) => {
                       if (href) {
-                        const embed = renderEmbeddedMedia(href)
-                        if (embed) return embed
+                        // Comprobar si el texto del link es exactamente la URL (link suelto)
+                        const isStandaloneUrl = typeof children === 'string' && children.trim() === href.trim()
+                        
+                        if (isStandaloneUrl) {
+                          const embed = renderEmbeddedMedia(href)
+                          if (embed) return embed
+                        }
                       }
                       return (
                         <a
