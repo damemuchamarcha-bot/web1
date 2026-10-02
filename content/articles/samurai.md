@@ -1,7 +1,8 @@
 ---
-title: samurai
+title: "Entre vaqueros y brujas: Fábula"
 date: 2026-10-02T15:17:00.000+02:00
-excerpt: samurai
+excerpt: Así es como se escucha el adelanto de la nueva era de la artista
+  madrileña Samuraï
 author: Marta Menjíbar
 section: musica
 category: analisis-de-albumes
