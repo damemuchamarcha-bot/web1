@@ -53,7 +53,7 @@ export async function generateMetadata({
   }
 }
 
-// Renderizado de negrita: si hay conector (y, e, o, u, &), aplica alternancia de color Rosa/Blanco entre los términos enlazados.
+// Renderizado inteligente de negrita basada en conectores (Bloque 1 - Conector - Bloque 2)
 function RenderBoldConnectorText({ children, isItalic }: { children: React.ReactNode; isItalic?: boolean }) {
   const extractText = (node: React.ReactNode): string => {
     if (typeof node === 'string') return node
@@ -65,49 +65,42 @@ function RenderBoldConnectorText({ children, isItalic }: { children: React.React
     return ''
   }
 
-  const text = extractText(children)
-  const tokens = text.split(/(\s+)/)
+  const rawText = extractText(children)
 
-  // Comprobar si en todo el bloque existe algún conector de adición/enlace (y, e, o, u, &)
-  const isConnector = (word: string) => /^(y|e|o|u|&)$/i.test(word.trim())
-  const hasConnector = tokens.some((token) => !/^\s+$/.test(token) && isConnector(token))
+  // Expresión regular que detecta conectores aislados (" y ", " e ", " o ", " u ", " & ")
+  const connectorRegex = /(\s+(?:y|e|o|u|&)\s+)/i
 
-  // Si NO contiene ningún conector, renderizar todo el bloque en negrita rosa uniforme
-  if (!hasConnector) {
+  const parts = rawText.split(connectorRegex)
+
+  // Si no hay conector, renderizar la negrita completa en rosa uniforme
+  if (parts.length === 1) {
     return (
       <strong className={`font-black text-punk-pink ${isItalic ? 'italic' : ''}`}>
-        {text}
+        {rawText}
       </strong>
     )
   }
 
-  // Si CONTIENE un conector: alternar el color de las palabras (términos en rosa, conectores en blanco)
-  let wordIndex = 0
-
+  // Si hay conector (ej: "THE FALLING MAN" + " y " + "SuperGood;"):
+  // Parte 1 (Nombre 1) -> Blanco
+  // Parte 2 (Conector) -> Rosa
+  // Parte 3 (Nombre 2) -> Blanco
   return (
     <strong className={`font-black ${isItalic ? 'italic' : ''}`}>
-      {tokens.map((token, idx) => {
-        if (/^\s+$/.test(token)) {
-          return <React.Fragment key={idx}>{token}</React.Fragment>
+      {parts.map((part, index) => {
+        const isConnectorToken = connectorRegex.test(` ${part} `) || /^\s*(y|e|o|u|&)\s*$/i.test(part)
+
+        if (isConnectorToken) {
+          return (
+            <span key={index} className="inline text-punk-pink">
+              {part}
+            </span>
+          )
         }
-
-        const connectorWord = isConnector(token)
-        let isPink = false
-
-        if (connectorWord) {
-          // El conector ("y", "e", "o", "u") va en blanco
-          isPink = false
-        } else {
-          // Las palabras unidas alternan empezando en rosa primario
-          isPink = wordIndex % 2 === 0
-          wordIndex++
-        }
-
-        const colorClass = isPink ? 'text-punk-pink' : 'text-white'
 
         return (
-          <span key={idx} className={`inline ${colorClass}`}>
-            {token}
+          <span key={index} className="inline text-white">
+            {part}
           </span>
         )
       })}
