@@ -53,13 +53,24 @@ export async function generateMetadata({
   }
 }
 
-// Renderizado de alternancia blanco/rosa con grosor de negrita bien marcado
-function RenderBoldAlternatingWords({ text, isItalic }: { text: string; isItalic?: boolean }) {
+// Alternancia de colores Blanco y Rosa SOLO para el texto en negrita
+function RenderBoldAlternatingWords({ children, isItalic }: { children: React.ReactNode; isItalic?: boolean }) {
+  const extractText = (node: React.ReactNode): string => {
+    if (typeof node === 'string') return node
+    if (typeof node === 'number') return String(node)
+    if (Array.isArray(node)) return node.map(extractText).join('')
+    if (React.isValidElement(node) && node.props.children) {
+      return extractText(node.props.children)
+    }
+    return ''
+  }
+
+  const text = extractText(children)
   const tokens = text.split(/(\s+)/)
   let wordCounter = 0
 
   return (
-    <strong className={`font-extrabold ${isItalic ? 'italic' : ''}`}>
+    <strong className={`font-black ${isItalic ? 'italic' : ''}`}>
       {tokens.map((token, idx) => {
         if (/^\s+$/.test(token)) {
           return <React.Fragment key={idx}>{token}</React.Fragment>
@@ -78,47 +89,7 @@ function RenderBoldAlternatingWords({ text, isItalic }: { text: string; isItalic
   )
 }
 
-// Helper para parsear Markdown (negritas con alternancia, cursivas sencillas y combinadas)
-function parseMarkdownFormatting(text: string, keyPrefix: string): React.ReactNode[] {
-  const regex = /(\*\*\*[\s\S]+?\*\*\*|\*\*[\s\S]+?\*\*|\*[\s\S]+?\*|___[\s\S]+?___|__[\s\S]+?__|_[s\S]+?_)/g
-  const parts = text.split(regex)
-
-  return parts.map((part, index) => {
-    const key = `${keyPrefix}-fmt-${index}`
-
-    // 1. Negrita + Cursiva combinadas: ***texto***
-    if (/^(\*\*\*[\s\S]+\*\*\*|___[\s\S]+___)$/.test(part)) {
-      const cleanText = part.slice(3, -3)
-      return <RenderBoldAlternatingWords key={key} text={cleanText} isItalic />
-    }
-
-    // 2. Negrita solo: **texto**
-    if (/^(\*\*[\s\S]+\*\*|__[\s\S]+__)$/.test(part)) {
-      const cleanText = part.slice(2, -2)
-      return <RenderBoldAlternatingWords key={key} text={cleanText} />
-    }
-
-    // 3. Cursiva solo: *texto*
-    if (/^(\*[\s\S]+\*|_[\s\S]+_)$/.test(part)) {
-      const cleanText = part.slice(1, -1)
-      return (
-        <em key={key} className="italic text-punk-cream">
-          {cleanText}
-        </em>
-      )
-    }
-
-    // Texto plano normal
-    return <React.Fragment key={key}>{part}</React.Fragment>
-  })
-}
-
-function RenderParagraphWithMarkdown({ text }: { text: string }) {
-  if (!text) return null
-  return <>{parseMarkdownFormatting(text, 'p-main')}</>
-}
-
-// Renderizador de reproductores limpio (sin sombras pesadas)
+// Renderizador de reproductores (Spotify, YouTube, Instagram) limpio y sin sombras pesadas
 function renderEmbeddedMedia(url: string) {
   if (!url) return null
   const cleanUrl = url.trim()
@@ -345,39 +316,15 @@ export default async function ArticlePage({
                     h3: ({ node, ...props }) => (
                       <h3 className="mt-8 mb-2 font-display text-xl sm:text-2xl uppercase tracking-tight text-punk-pink" {...props} />
                     ),
-
-                    // Cita editorial limpia: con borde lateral rosa, fondo oscuro suave y texto en cursiva
                     blockquote: ({ node, ...props }) => (
                       <blockquote className="my-8 border-l-4 border-punk-pink bg-punk-black/40 px-6 py-4 italic text-punk-cream/90 rounded-r shadow-inner" {...props} />
                     ),
-
-                    p: ({ node, children, ...props }) => {
-                      if (typeof children === 'string') {
-                        return (
-                          <span className="m-0 inline" {...props}>
-                            <RenderParagraphWithMarkdown text={children} />
-                          </span>
-                        )
-                      }
-
-                      const rawText = React.Children.toArray(children)
-                        .map((child) => {
-                          if (typeof child === 'string') return child
-                          if (React.isValidElement(child) && (child as any).props.children) {
-                            return typeof (child as any).props.children === 'string'
-                              ? (child as any).props.children
-                              : ''
-                          }
-                          return ''
-                        })
-                        .join('')
-
-                      return (
-                        <span className="m-0 inline" {...props}>
-                          <RenderParagraphWithMarkdown text={rawText || (children as any)} />
-                        </span>
-                      )
-                    },
+                    strong: ({ node, children }) => (
+                      <RenderBoldAlternatingWords>{children}</RenderBoldAlternatingWords>
+                    ),
+                    em: ({ node, ...props }) => (
+                      <em className="italic text-punk-cream" {...props} />
+                    ),
                     a: ({ node, href, children, ...props }) => {
                       if (href) {
                         const isStandaloneUrl = typeof children === 'string' && children.trim() === href.trim()
