@@ -53,24 +53,14 @@ export async function generateMetadata({
   }
 }
 
-// Sanea errores comunes de redacción en Markdown (asteriscos pegados a comillas o palabras sin espacio)
-function fixMarkdownAsteriskSpacing(text: string): string {
-  if (!text) return ''
-  return text
-    // Corrige asteriscos de inicio pegados a signos o letras (ej: "estudio**" -> "estudio **")
-    .replace(/([a-zA-Z0-9áéíóúÁÉÍÓÚñÑ"',;.:])(\*{2,3})/g, '$1 $2')
-    // Corrige asteriscos de cierre pegados a palabras (ej: "**con" -> "** con")
-    .replace(/(\*{2,3})([a-zA-Z0-9áéíóúÁÉÍÓÚñÑ])/g, '$1 $2')
-}
-
-// Componente para renderizar la negrita (strong) detectando conectores y manteniendo formato
+// Renderizado de negrita: detecta si existen conectores (y, e, o, u, &) para alternar o teñir de rosa
 function RenderStrongBold({ children }: { children: React.ReactNode }) {
   const extractText = (node: React.ReactNode): string => {
     if (typeof node === 'string') return node
     if (typeof node === 'number') return String(node)
     if (Array.isArray(node)) return node.map(extractText).join('')
-    if (React.isValidElement(node) && node.props.children) {
-      return extractText(node.props.children)
+    if (React.isValidElement(node) && (node.props as { children?: React.ReactNode }).children) {
+      return extractText((node.props as { children?: React.ReactNode }).children)
     }
     return ''
   }
@@ -79,16 +69,12 @@ function RenderStrongBold({ children }: { children: React.ReactNode }) {
   const connectorRegex = /(\s+(?:y|e|o|u|&)\s+)/i
   const parts = rawText.split(connectorRegex)
 
-  // Si no hay conector, renderiza toda la negrita en rosa primario
+  // Si no hay conector en la frase en negrita, todo va en rosa primario
   if (parts.length === 1) {
-    return (
-      <strong className="font-black text-punk-pink">
-        {children}
-      </strong>
-    )
+    return <strong className="font-black text-punk-pink">{children}</strong>
   }
 
-  // Si hay un conector de adición/enlace (y, e, o, u, &), aplica la alternancia
+  // Si hay conector, alterna los bloques principales en blanco y los conectores en rosa
   return (
     <strong className="font-black">
       {parts.map((part, index) => {
@@ -280,8 +266,7 @@ export default async function ArticlePage({
         {/* Cuerpo del artículo */}
         <div className="mt-10 flex flex-col gap-6">
           {article.body.map((para, i) => {
-            const sanitizedPara = fixMarkdownAsteriskSpacing(para)
-            const trimmed = sanitizedPara.trim()
+            const trimmed = para.trim()
 
             if (trimmed === '---' || trimmed === '***') {
               return (
@@ -339,11 +324,9 @@ export default async function ArticlePage({
                     blockquote: ({ node, ...props }) => (
                       <blockquote className="my-8 border-l-4 border-punk-pink bg-punk-black/40 px-6 py-4 italic text-punk-cream/90 rounded-r shadow-inner" {...props} />
                     ),
-                    // Componente de Negrita
                     strong: ({ node, children }) => (
                       <RenderStrongBold>{children}</RenderStrongBold>
                     ),
-                    // Componente de Cursiva
                     em: ({ node, children, ...props }) => (
                       <em className="italic text-punk-cream" {...props}>
                         {children}
@@ -399,7 +382,7 @@ export default async function ArticlePage({
                     },
                   }}
                 >
-                  {sanitizedPara}
+                  {para}
                 </ReactMarkdown>
               </div>
             )
@@ -450,4 +433,5 @@ export default async function ArticlePage({
       </section>
     </article>
   )
-}
+} 
+ 
