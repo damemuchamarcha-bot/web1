@@ -53,7 +53,32 @@ export async function generateMetadata({
   }
 }
 
-// Helper para parsear Markdown (negritas, cursivas y combinadas) sin dejar asteriscos visibles
+// Función para renderizar la alternancia de colores ÚNICAMENTE dentro de las negritas
+function RenderBoldAlternatingWords({ text, isItalic }: { text: string; isItalic?: boolean }) {
+  const tokens = text.split(/(\s+)/)
+  let wordCounter = 0
+
+  return (
+    <strong className={`font-bold ${isItalic ? 'italic' : ''}`}>
+      {tokens.map((token, idx) => {
+        if (/^\s+$/.test(token)) {
+          return <React.Fragment key={idx}>{token}</React.Fragment>
+        }
+        const isPink = wordCounter % 2 !== 0
+        const colorClass = isPink ? 'text-punk-pink' : 'text-punk-cream'
+        wordCounter++
+
+        return (
+          <span key={idx} className={`inline ${colorClass}`}>
+            {token}
+          </span>
+        )
+      })}
+    </strong>
+  )
+}
+
+// Helper para parsear Markdown (negritas con alternancia, cursivas sencillas y combinadas)
 function parseMarkdownFormatting(text: string, keyPrefix: string): React.ReactNode[] {
   const regex = /(\*\*\*[\s\S]+?\*\*\*|\*\*[\s\S]+?\*\*|\*[\s\S]+?\*|___[\s\S]+?___|__[\s\S]+?__|_[s\S]+?_)/g
   const parts = text.split(regex)
@@ -61,77 +86,40 @@ function parseMarkdownFormatting(text: string, keyPrefix: string): React.ReactNo
   return parts.map((part, index) => {
     const key = `${keyPrefix}-fmt-${index}`
 
-    // 1. Negrita + Cursiva combinadas: ***texto***
+    // 1. Negrita + Cursiva combinadas: ***texto*** (Aplica alternancia de color por ser negrita)
     if (/^(\*\*\*[\s\S]+\*\*\*|___[\s\S]+___)$/.test(part)) {
       const cleanText = part.slice(3, -3)
-      return (
-        <strong key={key} className="font-bold italic">
-          <em>{cleanText}</em>
-        </strong>
-      )
+      return <RenderBoldAlternatingWords key={key} text={cleanText} isItalic />
     }
 
-    // 2. Negrita: **texto**
+    // 2. Negrita solo: **texto** (Aplica alternancia de color)
     if (/^(\*\*[\s\S]+\*\*|__[\s\S]+__)$/.test(part)) {
       const cleanText = part.slice(2, -2)
-      return (
-        <strong key={key} className="font-bold">
-          {cleanText}
-        </strong>
-      )
+      return <RenderBoldAlternatingWords key={key} text={cleanText} />
     }
 
-    // 3. Cursiva: *texto*
+    // 3. Cursiva solo: *texto* (Mantiene texto uniforme en blanco/crema sin alternar)
     if (/^(\*[\s\S]+\*|_[\s\S]+_)$/.test(part)) {
       const cleanText = part.slice(1, -1)
       return (
-        <em key={key} className="italic">
+        <em key={key} className="italic text-punk-cream">
           {cleanText}
         </em>
       )
     }
 
+    // Texto plano normal (Mantiene color base blanco/crema)
     return <React.Fragment key={key}>{part}</React.Fragment>
   })
 }
 
-// Componente que garantiza la alternancia blanco/rosa y preserva los espacios exactos
-function RenderAlternatingText({ text }: { text: string }) {
+// Componente que renderiza el párrafo manteniendo los espacios y procesando el Markdown
+function RenderParagraphWithMarkdown({ text }: { text: string }) {
   if (!text) return null
-
-  // Dividimos por espacios en blanco preservándolos como tokens (\s+)
-  const tokens = text.split(/(\s+)/)
-  let wordCounter = 0
-
-  return (
-    <>
-      {tokens.map((token, tIdx) => {
-        const tokenKey = `tok-${tIdx}`
-
-        // Si el token son espacios o saltos de línea, se renderizan exactamente igual
-        if (/^\s+$/.test(token)) {
-          return <React.Fragment key={tokenKey}>{token}</React.Fragment>
-        }
-
-        // Alternancia de colores: Palabra 0 (Blanco suave), 1 (Rosa acento), 2 (Blanco suave)...
-        const isPink = wordCounter % 2 !== 0
-        const colorClass = isPink ? 'text-punk-pink' : 'text-punk-cream'
-        wordCounter++
-
-        // Parsea los formatos ** * *** dentro de la palabra
-        const formattedContent = parseMarkdownFormatting(token, tokenKey)
-
-        return (
-          <span key={tokenKey} className={`inline ${colorClass}`}>
-            {formattedContent}
-          </span>
-        )
-      })}
-    </>
-  )
+  return <>{parseMarkdownFormatting(text, 'p-main')}</>
 }
 
-// Renderizador de reproductores (Spotify, YouTube, Instagram) con sombras sólidas Neo-Brutalist
+// Renderizador de reproductores (Spotify, YouTube, Instagram)
 function renderEmbeddedMedia(url: string) {
   if (!url) return null
   const cleanUrl = url.trim()
@@ -216,7 +204,6 @@ export default async function ArticlePage({
 
   const related = getRecent(article.slug).slice(0, 3)
 
-  // Datos estructurados (JSON-LD) para SEO y Google News
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://damemarcha.com'
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -243,10 +230,8 @@ export default async function ArticlePage({
 
   return (
     <article lang="es">
-      {/* Barra de progreso de lectura */}
       <ReadingProgressBar />
 
-      {/* Script JSON-LD para Google News / Rich Results */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -266,7 +251,6 @@ export default async function ArticlePage({
         <div className="absolute inset-0 bg-gradient-to-t from-punk-black via-punk-black/50 to-punk-black/20" />
       </div>
 
-      {/* Contenedor principal con ancho optimizado de lectura editorial (max-w-[680px]) */}
       <div className="relative z-10 mx-auto -mt-16 max-w-[680px] px-4 sm:px-6">
         <Link
           href={`/${article.section}`}
@@ -302,7 +286,6 @@ export default async function ArticlePage({
           </span>
         </div>
 
-        {/* Botones para compartir en redes y copiar enlace */}
         <ShareButtons title={article.title} />
 
         {/* Cuerpo del artículo */}
@@ -310,7 +293,6 @@ export default async function ArticlePage({
           {article.body.map((para, i) => {
             const trimmed = para.trim()
 
-            // Separador gráfico sutil estilo revista punk
             if (trimmed === '---' || trimmed === '***') {
               return (
                 <div key={i} className="my-8 flex items-center justify-center gap-3 text-punk-pink/60 font-mono text-sm tracking-widest">
@@ -319,7 +301,6 @@ export default async function ArticlePage({
               )
             }
 
-            // Detectar alineación especificada opcionalmente
             let alignmentClass = 'text-left'
             if (trimmed.startsWith('->') && trimmed.endsWith('<-')) {
               alignmentClass = 'text-center'
@@ -329,13 +310,11 @@ export default async function ArticlePage({
               alignmentClass = 'text-justify'
             }
 
-            // 1. Revisa si la línea es un enlace directo de Spotify/YouTube/Instagram
             const mediaEmbed = renderEmbeddedMedia(trimmed)
             if (mediaEmbed) {
               return <div key={i}>{mediaEmbed}</div>
             }
 
-            // 2. Si trae un iframe directo o HTML del editor
             const isHTML = trimmed.startsWith('<') && trimmed.endsWith('>')
             if (isHTML || trimmed.includes('<iframe')) {
               return (
@@ -347,11 +326,10 @@ export default async function ArticlePage({
               )
             }
 
-            // 3. Párrafo estándar en Markdown con alineación, encabezados, citas y alternancia blanco/rosa
             return (
               <div
                 key={i}
-                className={`text-pretty text-lg leading-[1.85] ${alignmentClass} ${
+                className={`text-pretty text-lg leading-[1.85] text-punk-cream/85 ${alignmentClass} ${
                   i === 0
                     ? 'first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:font-display first-letter:text-6xl first-letter:leading-[0.8] first-letter:text-punk-pink'
                     : ''
@@ -359,7 +337,6 @@ export default async function ArticlePage({
               >
                 <ReactMarkdown
                   components={{
-                    // --- ENCABEZADOS INTEGRADOS ---
                     h1: ({ node, ...props }) => (
                       <h1 className="mt-10 mb-4 font-display text-3xl sm:text-4xl uppercase tracking-tight text-punk-cream border-b-2 border-punk-pink/40 pb-2" {...props} />
                     ),
@@ -369,18 +346,14 @@ export default async function ArticlePage({
                     h3: ({ node, ...props }) => (
                       <h3 className="mt-8 mb-2 font-display text-xl sm:text-2xl uppercase tracking-tight text-punk-pink" {...props} />
                     ),
-
-                    // --- CITAS (BLOCKQUOTES) DESTACADAS TIPO CINTA PUNK ---
                     blockquote: ({ node, ...props }) => (
                       <blockquote className="my-8 border-y-2 border-punk-pink bg-punk-black/80 py-5 px-6 font-display text-xl sm:text-2xl uppercase tracking-wide text-punk-yellow shadow-[4px_4px_0px_0px_rgba(255,46,147,0.3)]" {...props} />
                     ),
-
-                    // Renderizado de párrafos con alternancia blanco/rosa y parseo de negritas/cursivas
                     p: ({ node, children, ...props }) => {
                       if (typeof children === 'string') {
                         return (
                           <span className="m-0 inline" {...props}>
-                            <RenderAlternatingText text={children} />
+                            <RenderParagraphWithMarkdown text={children} />
                           </span>
                         )
                       }
@@ -399,7 +372,7 @@ export default async function ArticlePage({
 
                       return (
                         <span className="m-0 inline" {...props}>
-                          <RenderAlternatingText text={rawText || (children as any)} />
+                          <RenderParagraphWithMarkdown text={rawText || (children as any)} />
                         </span>
                       )
                     },
