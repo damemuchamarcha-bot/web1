@@ -53,18 +53,18 @@ export async function generateMetadata({
   }
 }
 
-// Limpia y normaliza espacios pegados a asteriscos para evitar que queden literales en pantalla
-function sanitizeMarkdownSyntax(text: string): string {
+// Sanea errores comunes de redacción en Markdown (asteriscos pegados a comillas o palabras sin espacio)
+function fixMarkdownAsteriskSpacing(text: string): string {
   if (!text) return ''
   return text
-    // Añade espacio si la negrita empieza pegada a una palabra o comilla (ej: "estudio**" -> "estudio **")
+    // Corrige asteriscos de inicio pegados a signos o letras (ej: "estudio**" -> "estudio **")
     .replace(/([a-zA-Z0-9áéíóúÁÉÍÓÚñÑ"',;.:])(\*{2,3})/g, '$1 $2')
-    // Añade espacio si la negrita termina pegada a una palabra posterior (ej: "**con" -> "** con")
+    // Corrige asteriscos de cierre pegados a palabras (ej: "**con" -> "** con")
     .replace(/(\*{2,3})([a-zA-Z0-9áéíóúÁÉÍÓÚñÑ])/g, '$1 $2')
 }
 
-// Renderizado de negrita: detecta si hay conectores (y, e, o, u, &) para alternar o mostrar rosa uniforme
-function RenderBoldConnectorText({ children, isItalic }: { children: React.ReactNode; isItalic?: boolean }) {
+// Componente para renderizar la negrita (strong) detectando conectores y manteniendo formato
+function RenderStrongBold({ children }: { children: React.ReactNode }) {
   const extractText = (node: React.ReactNode): string => {
     if (typeof node === 'string') return node
     if (typeof node === 'number') return String(node)
@@ -79,16 +79,18 @@ function RenderBoldConnectorText({ children, isItalic }: { children: React.React
   const connectorRegex = /(\s+(?:y|e|o|u|&)\s+)/i
   const parts = rawText.split(connectorRegex)
 
+  // Si no hay conector, renderiza toda la negrita en rosa primario
   if (parts.length === 1) {
     return (
-      <strong className={`font-black text-punk-pink ${isItalic ? 'italic' : ''}`}>
-        {rawText}
+      <strong className="font-black text-punk-pink">
+        {children}
       </strong>
     )
   }
 
+  // Si hay un conector de adición/enlace (y, e, o, u, &), aplica la alternancia
   return (
-    <strong className={`font-black ${isItalic ? 'italic' : ''}`}>
+    <strong className="font-black">
       {parts.map((part, index) => {
         const isConnectorToken = connectorRegex.test(` ${part} `) || /^\s*(y|e|o|u|&)\s*$/i.test(part)
 
@@ -108,41 +110,6 @@ function RenderBoldConnectorText({ children, isItalic }: { children: React.React
       })}
     </strong>
   )
-}
-
-// Parseador personalizado que garantiza la eliminación de los asteriscos y aplica estilos
-function parseCustomMarkdown(text: string, keyPrefix: string): React.ReactNode[] {
-  const sanitized = sanitizeMarkdownSyntax(text)
-  const regex = /(\*\*\*[\s\S]+?\*\*\*|\*\*[\s\S]+?\*\*|\*[\s\S]+?\*|___[\s\S]+?___|__[\s\S]+?__|_[s\S]+?_)/g
-  const parts = sanitized.split(regex)
-
-  return parts.map((part, index) => {
-    const key = `${keyPrefix}-custom-${index}`
-
-    // Negrita + Cursiva (***texto***)
-    if (/^(\*\*\*[\s\S]+\*\*\*|___[\s\S]+___)$/.test(part)) {
-      const cleanText = part.slice(3, -3).trim()
-      return <RenderBoldConnectorText key={key} isItalic>{cleanText}</RenderBoldConnectorText>
-    }
-
-    // Negrita (**texto**)
-    if (/^(\*\*[\s\S]+\*\*|__[\s\S]+__)$/.test(part)) {
-      const cleanText = part.slice(2, -2).trim()
-      return <RenderBoldConnectorText key={key}>{cleanText}</RenderBoldConnectorText>
-    }
-
-    // Cursiva (*texto*)
-    if (/^(\*[\s\S]+\*|_[\s\S]+_)$/.test(part)) {
-      const cleanText = part.slice(1, -1).trim()
-      return (
-        <em key={key} className="italic text-punk-cream">
-          {cleanText}
-        </em>
-      )
-    }
-
-    return <React.Fragment key={key}>{part}</React.Fragment>
-  })
 }
 
 function renderEmbeddedMedia(url: string) {
@@ -313,7 +280,8 @@ export default async function ArticlePage({
         {/* Cuerpo del artículo */}
         <div className="mt-10 flex flex-col gap-6">
           {article.body.map((para, i) => {
-            const trimmed = para.trim()
+            const sanitizedPara = fixMarkdownAsteriskSpacing(para)
+            const trimmed = sanitizedPara.trim()
 
             if (trimmed === '---' || trimmed === '***') {
               return (
@@ -371,30 +339,15 @@ export default async function ArticlePage({
                     blockquote: ({ node, ...props }) => (
                       <blockquote className="my-8 border-l-4 border-punk-pink bg-punk-black/40 px-6 py-4 italic text-punk-cream/90 rounded-r shadow-inner" {...props} />
                     ),
-                    // Renderizado personalizado de párrafos limpiando asteriscos
-                    p: ({ node, children, ...props }) => {
-                      const getRawString = (child: React.ReactNode): string => {
-                        if (typeof child === 'string') return child
-                        if (typeof child === 'number') return String(child)
-                        if (Array.isArray(child)) return child.map(getRawString).join('')
-                        if (React.isValidElement(child) && child.props.children) {
-                          return getRawString(child.props.children)
-                        }
-                        return ''
-                      }
-
-                      const rawText = getRawString(children)
-                      return (
-                        <span className="m-0 inline" {...props}>
-                          {parseCustomMarkdown(rawText || para, `p-${i}`)}
-                        </span>
-                      )
-                    },
+                    // Componente de Negrita
                     strong: ({ node, children }) => (
-                      <RenderBoldConnectorText>{children}</RenderBoldConnectorText>
+                      <RenderStrongBold>{children}</RenderStrongBold>
                     ),
-                    em: ({ node, ...props }) => (
-                      <em className="italic text-punk-cream" {...props} />
+                    // Componente de Cursiva
+                    em: ({ node, children, ...props }) => (
+                      <em className="italic text-punk-cream" {...props}>
+                        {children}
+                      </em>
                     ),
                     a: ({ node, href, children, ...props }) => {
                       if (href) {
@@ -446,7 +399,7 @@ export default async function ArticlePage({
                     },
                   }}
                 >
-                  {para}
+                  {sanitizedPara}
                 </ReactMarkdown>
               </div>
             )
