@@ -4,6 +4,7 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 import { ArrowLeft, Clock, Calendar } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
+import React from 'react'
 import { articles, getArticle, getRecent } from '@/lib/articles'
 import { CategoryTag } from '@/components/category-tag'
 import { ArticleCard } from '@/components/article-card'
@@ -50,6 +51,84 @@ export async function generateMetadata({
       images: [article.image],
     },
   }
+}
+
+// Helper para parsear Markdown (negritas, cursivas y combinadas) sin dejar asteriscos visibles
+function parseMarkdownFormatting(text: string, keyPrefix: string): React.ReactNode[] {
+  const regex = /(\*\*\*[\s\S]+?\*\*\*|\*\*[\s\S]+?\*\*|\*[\s\S]+?\*|___[\s\S]+?___|__[\s\S]+?__|_[s\S]+?_)/g
+  const parts = text.split(regex)
+
+  return parts.map((part, index) => {
+    const key = `${keyPrefix}-fmt-${index}`
+
+    // 1. Negrita + Cursiva combinadas: ***texto***
+    if (/^(\*\*\*[\s\S]+\*\*\*|___[\s\S]+___)$/.test(part)) {
+      const cleanText = part.slice(3, -3)
+      return (
+        <strong key={key} className="font-bold italic">
+          <em>{cleanText}</em>
+        </strong>
+      )
+    }
+
+    // 2. Negrita: **texto**
+    if (/^(\*\*[\s\S]+\*\*|__[\s\S]+__)$/.test(part)) {
+      const cleanText = part.slice(2, -2)
+      return (
+        <strong key={key} className="font-bold">
+          {cleanText}
+        </strong>
+      )
+    }
+
+    // 3. Cursiva: *texto*
+    if (/^(\*[\s\S]+\*|_[\s\S]+_)$/.test(part)) {
+      const cleanText = part.slice(1, -1)
+      return (
+        <em key={key} className="italic">
+          {cleanText}
+        </em>
+      )
+    }
+
+    return <React.Fragment key={key}>{part}</React.Fragment>
+  })
+}
+
+// Componente que garantiza la alternancia blanco/rosa y preserva los espacios exactos
+function RenderAlternatingText({ text }: { text: string }) {
+  if (!text) return null
+
+  // Dividimos por espacios en blanco preservándolos como tokens (\s+)
+  const tokens = text.split(/(\s+)/)
+  let wordCounter = 0
+
+  return (
+    <>
+      {tokens.map((token, tIdx) => {
+        const tokenKey = `tok-${tIdx}`
+
+        // Si el token son espacios o saltos de línea, se renderizan exactamente igual
+        if (/^\s+$/.test(token)) {
+          return <React.Fragment key={tokenKey}>{token}</React.Fragment>
+        }
+
+        // Contador de palabras reales: Palabra 0 (Blanco), 1 (Rosa), 2 (Blanco), 3 (Rosa)...
+        const isPink = wordCounter % 2 !== 0
+        const colorClass = isPink ? 'text-punk-pink' : 'text-punk-cream'
+        wordCounter++
+
+        // Parsea los formatos ** * *** dentro de la palabra
+        const formattedContent = parseMarkdownFormatting(token, tokenKey)
+
+        return (
+          <span key={tokenKey} className={`inline ${colorClass}`}>
+            {formattedContent}
+          </span>
+        )
+      })}
+    </>
+  )
 }
 
 // Renderizador de reproductores (Spotify, YouTube, Instagram)
@@ -258,11 +337,11 @@ export default async function ArticlePage({
               )
             }
 
-            // 3. Párrafo estándar en Markdown con alineación, encabezados y citas
+            // 3. Párrafo estándar en Markdown con alineación, encabezados, citas y alternancia blanco/rosa
             return (
               <div
                 key={i}
-                className={`text-pretty text-lg leading-[1.8] text-punk-cream/85 ${alignmentClass} ${
+                className={`text-pretty text-lg leading-[1.8] ${alignmentClass} ${
                   i === 0
                     ? 'first-letter:float-left first-letter:mr-3 first-letter:font-display first-letter:text-6xl first-letter:leading-[0.8] first-letter:text-punk-pink'
                     : ''
@@ -286,23 +365,37 @@ export default async function ArticlePage({
                       <blockquote className="my-6 border-l-4 border-punk-pink bg-punk-black/40 px-6 py-4 italic text-punk-cream/90 rounded-r shadow-inner" {...props} />
                     ),
 
-                    strong: ({ node, ...props }) => (
-                      <strong className="font-bold text-punk-pink" {...props} />
-                    ),
-                    em: ({ node, ...props }) => (
-                      <em className="italic text-punk-cream" {...props} />
-                    ),
-                    // Usamos <span> en lugar de <p> para prevenir errores de anidamiento HTML e hidratación si hay encabezados/bloques dentro
-                    p: ({ node, children, ...props }) => (
-                      <span className="m-0 inline" {...props}>
-                        {children}
-                      </span>
-                    ),
+                    // Renderizado de párrafos con alternancia blanco/rosa y parseo de negritas/cursivas sin asteriscos
+                    p: ({ node, children, ...props }) => {
+                      if (typeof children === 'string') {
+                        return (
+                          <span className="m-0 inline" {...props}>
+                            <RenderAlternatingText text={children} />
+                          </span>
+                        )
+                      }
+
+                      const rawText = React.Children.toArray(children)
+                        .map((child) => {
+                          if (typeof child === 'string') return child
+                          if (React.isValidElement(child) && (child as any).props.children) {
+                            return typeof (child as any).props.children === 'string'
+                              ? (child as any).props.children
+                              : ''
+                          }
+                          return ''
+                        })
+                        .join('')
+
+                      return (
+                        <span className="m-0 inline" {...props}>
+                          <RenderAlternatingText text={rawText || (children as any)} />
+                        </span>
+                      )
+                    },
                     a: ({ node, href, children, ...props }) => {
                       if (href) {
-                        // Comprobar si el texto del link es exactamente la URL (link suelto)
                         const isStandaloneUrl = typeof children === 'string' && children.trim() === href.trim()
-                        
                         if (isStandaloneUrl) {
                           const embed = renderEmbeddedMedia(href)
                           if (embed) return embed
