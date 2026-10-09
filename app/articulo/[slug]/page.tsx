@@ -53,19 +53,19 @@ export async function generateMetadata({
   }
 }
 
-// Función para renderizar la alternancia de colores ÚNICAMENTE dentro de las negritas
+// Renderizado de alternancia blanco/rosa con grosor de negrita bien marcado
 function RenderBoldAlternatingWords({ text, isItalic }: { text: string; isItalic?: boolean }) {
   const tokens = text.split(/(\s+)/)
   let wordCounter = 0
 
   return (
-    <strong className={`font-bold ${isItalic ? 'italic' : ''}`}>
+    <strong className={`font-extrabold ${isItalic ? 'italic' : ''}`}>
       {tokens.map((token, idx) => {
         if (/^\s+$/.test(token)) {
           return <React.Fragment key={idx}>{token}</React.Fragment>
         }
         const isPink = wordCounter % 2 !== 0
-        const colorClass = isPink ? 'text-punk-pink' : 'text-punk-cream'
+        const colorClass = isPink ? 'text-punk-pink' : 'text-white'
         wordCounter++
 
         return (
@@ -86,19 +86,19 @@ function parseMarkdownFormatting(text: string, keyPrefix: string): React.ReactNo
   return parts.map((part, index) => {
     const key = `${keyPrefix}-fmt-${index}`
 
-    // 1. Negrita + Cursiva combinadas: ***texto*** (Aplica alternancia de color por ser negrita)
+    // 1. Negrita + Cursiva combinadas: ***texto***
     if (/^(\*\*\*[\s\S]+\*\*\*|___[\s\S]+___)$/.test(part)) {
       const cleanText = part.slice(3, -3)
       return <RenderBoldAlternatingWords key={key} text={cleanText} isItalic />
     }
 
-    // 2. Negrita solo: **texto** (Aplica alternancia de color)
+    // 2. Negrita solo: **texto**
     if (/^(\*\*[\s\S]+\*\*|__[\s\S]+__)$/.test(part)) {
       const cleanText = part.slice(2, -2)
       return <RenderBoldAlternatingWords key={key} text={cleanText} />
     }
 
-    // 3. Cursiva solo: *texto* (Mantiene texto uniforme en blanco/crema sin alternar)
+    // 3. Cursiva solo: *texto*
     if (/^(\*[\s\S]+\*|_[\s\S]+_)$/.test(part)) {
       const cleanText = part.slice(1, -1)
       return (
@@ -108,18 +108,17 @@ function parseMarkdownFormatting(text: string, keyPrefix: string): React.ReactNo
       )
     }
 
-    // Texto plano normal (Mantiene color base blanco/crema)
+    // Texto plano normal
     return <React.Fragment key={key}>{part}</React.Fragment>
   })
 }
 
-// Componente que renderiza el párrafo manteniendo los espacios y procesando el Markdown
 function RenderParagraphWithMarkdown({ text }: { text: string }) {
   if (!text) return null
   return <>{parseMarkdownFormatting(text, 'p-main')}</>
 }
 
-// Renderizador de reproductores (Spotify, YouTube, Instagram)
+// Renderizador de reproductores limpio (sin sombras pesadas)
 function renderEmbeddedMedia(url: string) {
   if (!url) return null
   const cleanUrl = url.trim()
@@ -132,8 +131,8 @@ function renderEmbeddedMedia(url: string) {
       const type = spMatch[1]
       const id = spMatch[2]
       return (
-        <div className="my-10 w-full clear-both">
-          <div className="overflow-hidden border-2 border-punk-pink bg-punk-black shadow-[6px_6px_0px_0px_rgba(255,46,147,0.4)]">
+        <div className="my-8 w-full clear-both">
+          <div className="overflow-hidden rounded-lg border border-punk-pink/50 bg-punk-black">
             <iframe
               title="Reproductor de Spotify"
               src={`https://open.spotify.com/embed/${type}/${id}?utm_source=generator&theme=0`}
@@ -155,8 +154,8 @@ function renderEmbeddedMedia(url: string) {
   )
   if (ytMatch && ytMatch[1]) {
     return (
-      <div className="my-10 w-full clear-both">
-        <div className="relative aspect-video w-full overflow-hidden border-2 border-punk-yellow bg-punk-black/80 shadow-[6px_6px_0px_0px_rgba(255,230,0,0.3)]">
+      <div className="my-8 w-full clear-both">
+        <div className="relative aspect-video w-full overflow-hidden border border-white/10 bg-punk-black">
           <iframe
             title="Reproductor de YouTube"
             src={`https://www.youtube.com/embed/${ytMatch[1]}`}
@@ -176,8 +175,8 @@ function renderEmbeddedMedia(url: string) {
   )
   if (igMatch && igMatch[1]) {
     return (
-      <div className="my-10 w-full clear-both">
-        <div className="relative aspect-[4/5] mx-auto max-w-md overflow-hidden border-2 border-punk-cream/30 bg-punk-black/80 shadow-[6px_6px_0px_0px_rgba(255,255,255,0.2)]">
+      <div className="my-8 w-full clear-both">
+        <div className="relative aspect-[4/5] mx-auto max-w-md overflow-hidden border border-white/10 bg-punk-black">
           <iframe
             title="Publicación de Instagram"
             src={`https://www.instagram.com/p/${igMatch[1]}/embed`}
@@ -338,7 +337,7 @@ export default async function ArticlePage({
                 <ReactMarkdown
                   components={{
                     h1: ({ node, ...props }) => (
-                      <h1 className="mt-10 mb-4 font-display text-3xl sm:text-4xl uppercase tracking-tight text-punk-cream border-b-2 border-punk-pink/40 pb-2" {...props} />
+                      <h1 className="mt-10 mb-4 font-display text-3xl sm:text-4xl uppercase tracking-tight text-punk-cream border-b border-white/10 pb-2" {...props} />
                     ),
                     h2: ({ node, ...props }) => (
                       <h2 className="mt-9 mb-3 font-display text-2xl sm:text-3xl uppercase tracking-tight text-punk-yellow" {...props} />
@@ -346,9 +345,12 @@ export default async function ArticlePage({
                     h3: ({ node, ...props }) => (
                       <h3 className="mt-8 mb-2 font-display text-xl sm:text-2xl uppercase tracking-tight text-punk-pink" {...props} />
                     ),
+
+                    // Cita editorial limpia: con borde lateral rosa, fondo oscuro suave y texto en cursiva
                     blockquote: ({ node, ...props }) => (
-                      <blockquote className="my-8 border-y-2 border-punk-pink bg-punk-black/80 py-5 px-6 font-display text-xl sm:text-2xl uppercase tracking-wide text-punk-yellow shadow-[4px_4px_0px_0px_rgba(255,46,147,0.3)]" {...props} />
+                      <blockquote className="my-8 border-l-4 border-punk-pink bg-punk-black/40 px-6 py-4 italic text-punk-cream/90 rounded-r shadow-inner" {...props} />
                     ),
+
                     p: ({ node, children, ...props }) => {
                       if (typeof children === 'string') {
                         return (
@@ -403,7 +405,7 @@ export default async function ArticlePage({
 
                       return (
                         <span className="my-10 block w-full">
-                          <span className="relative block aspect-[16/9] w-full overflow-hidden border-2 border-white/20 shadow-[6px_6px_0px_0px_rgba(255,255,255,0.1)]">
+                          <span className="relative block aspect-[16/9] w-full overflow-hidden border border-white/10">
                             <Image
                               src={finalSrc}
                               alt={alt || 'Imagen del artículo'}
@@ -443,7 +445,7 @@ export default async function ArticlePage({
               {article.gallery.map((src, i) => (
                 <div
                   key={i}
-                  className="relative aspect-[4/3] overflow-hidden border-2 border-white/10 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.08)]"
+                  className="relative aspect-[4/3] overflow-hidden border border-white/10"
                 >
                   <Image
                     src={src.startsWith('uploads/') ? `/${src}` : src}
