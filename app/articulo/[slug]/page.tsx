@@ -53,6 +53,15 @@ export async function generateMetadata({
   }
 }
 
+// Función que limpia espacios accidentales en sintaxis Markdown (ej: "** texto **" -> "**texto**")
+function sanitizeMarkdownSpaces(text: string): string {
+  return text
+    .replace(/\*\*\*\s+/g, '***')
+    .replace(/\s+\*\*\*/g, '***')
+    .replace(/\*\*\s+/g, '**')
+    .replace(/\s+\*\*/g, '**')
+}
+
 // Renderizado inteligente de negrita basada en conectores (Bloque 1 - Conector - Bloque 2)
 function RenderBoldConnectorText({ children, isItalic }: { children: React.ReactNode; isItalic?: boolean }) {
   const extractText = (node: React.ReactNode): string => {
@@ -66,13 +75,9 @@ function RenderBoldConnectorText({ children, isItalic }: { children: React.React
   }
 
   const rawText = extractText(children)
-
-  // Expresión regular que detecta conectores aislados (" y ", " e ", " o ", " u ", " & ")
   const connectorRegex = /(\s+(?:y|e|o|u|&)\s+)/i
-
   const parts = rawText.split(connectorRegex)
 
-  // Si no hay conector, renderizar la negrita completa en rosa uniforme
   if (parts.length === 1) {
     return (
       <strong className={`font-black text-punk-pink ${isItalic ? 'italic' : ''}`}>
@@ -81,10 +86,6 @@ function RenderBoldConnectorText({ children, isItalic }: { children: React.React
     )
   }
 
-  // Si hay conector (ej: "THE FALLING MAN" + " y " + "SuperGood;"):
-  // Parte 1 (Nombre 1) -> Blanco
-  // Parte 2 (Conector) -> Rosa
-  // Parte 3 (Nombre 2) -> Blanco
   return (
     <strong className={`font-black ${isItalic ? 'italic' : ''}`}>
       {parts.map((part, index) => {
@@ -108,12 +109,10 @@ function RenderBoldConnectorText({ children, isItalic }: { children: React.React
   )
 }
 
-// Renderizador de reproductores (Spotify, YouTube, Instagram)
 function renderEmbeddedMedia(url: string) {
   if (!url) return null
   const cleanUrl = url.trim()
 
-  // 1. Detectar Spotify
   const isSpotify = cleanUrl.includes('spotify.com') || cleanUrl.includes('spotify.link')
   if (isSpotify) {
     const spMatch = cleanUrl.match(/(track|album|playlist|episode|show)\/([a-zA-Z0-9]+)/)
@@ -138,7 +137,6 @@ function renderEmbeddedMedia(url: string) {
     }
   }
 
-  // 2. Detectar YouTube
   const ytMatch = cleanUrl.match(
     /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
   )
@@ -159,7 +157,6 @@ function renderEmbeddedMedia(url: string) {
     )
   }
 
-  // 3. Detectar Instagram
   const igMatch = cleanUrl.match(
     /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:p|reel)\/([a-zA-Z0-9_-]+)/
   )
@@ -280,7 +277,8 @@ export default async function ArticlePage({
         {/* Cuerpo del artículo */}
         <div className="mt-10 flex flex-col gap-6">
           {article.body.map((para, i) => {
-            const trimmed = para.trim()
+            const sanitizedPara = sanitizeMarkdownSpaces(para)
+            const trimmed = sanitizedPara.trim()
 
             if (trimmed === '---' || trimmed === '***') {
               return (
@@ -310,7 +308,7 @@ export default async function ArticlePage({
                 <div
                   key={i}
                   className={`my-4 text-pretty text-lg leading-[1.85] text-punk-cream/85 ${alignmentClass}`}
-                  dangerouslySetInnerHTML={{ __html: para }}
+                  dangerouslySetInnerHTML={{ __html: sanitizedPara }}
                 />
               )
             }
@@ -394,7 +392,7 @@ export default async function ArticlePage({
                     },
                   }}
                 >
-                  {para}
+                  {sanitizedPara}
                 </ReactMarkdown>
               </div>
             )
