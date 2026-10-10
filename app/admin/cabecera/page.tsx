@@ -1,20 +1,12 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { ArrowLeft, Video, Play, Lock, ShieldCheck, Sparkles } from 'lucide-react'
+import { ArrowLeft, Video, Play, Lock, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 
 const SECRET_PIN = 'dame-marcha-punk-2026'
 
-interface Particle {
-  x: number
-  y: number
-  size: number
-  speedY: number
-  alpha: number
-}
-
-export default function GeneradorCabeceraPro() {
+export default function GeneradorCabeceraPunkPro() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const [inputPin, setInputPin] = useState<string>('')
   const [errorPin, setErrorPin] = useState<boolean>(false)
@@ -24,8 +16,6 @@ export default function GeneradorCabeceraPro() {
   const [winnerIndex, setWinnerIndex] = useState<number>(1)
   const [albumTitle, setAlbumTitle] = useState<string>('SAMURAÏ — AMARRE')
   const [isRecording, setIsRecording] = useState<boolean>(false)
-
-  const particlesRef = useRef<Particle[]>([])
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,7 +27,7 @@ export default function GeneradorCabeceraPro() {
     }
   }
 
-  // Carga y adaptación automática de cualquier imagen a cuadrado perfecto
+  // Carga de imágenes sin deformación (Crop tipo object-cover)
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
     const files = Array.from(e.target.files)
@@ -47,23 +37,38 @@ export default function GeneradorCabeceraPro() {
       const img = new Image()
       img.src = URL.createObjectURL(file)
       img.onload = () => {
-        // Creamos un canvas auxiliar para recortar la imagen en formato cuadrado exacto (Cover)
+        // Lienzo auxiliar para recorte 1:1 proporcional
         const squareCanvas = document.createElement('canvas')
-        const size = 800
-        squareCanvas.width = size
-        squareCanvas.height = size
+        const targetSize = 800
+        squareCanvas.width = targetSize
+        squareCanvas.height = targetSize
         const sCtx = squareCanvas.getContext('2d')
-        
-        if (sCtx) {
-          const minDim = Math.min(img.width, img.height)
-          const sx = (img.width - minDim) / 2
-          const sy = (img.height - minDim) / 2
-          sCtx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size)
 
-          const squareImg = new Image()
-          squareImg.src = squareCanvas.toDataURL('image/jpeg', 0.95)
-          squareImg.onload = () => {
-            loaded.push(squareImg)
+        if (sCtx) {
+          const imgAspect = img.width / img.height
+          let drawW = targetSize
+          let drawH = targetSize
+          let startX = 0
+          let startY = 0
+
+          if (imgAspect > 1) {
+            // Imagen panorámica
+            drawW = targetSize * imgAspect
+            startX = -(drawW - targetSize) / 2
+          } else if (imgAspect < 1) {
+            // Imagen vertical
+            drawH = targetSize / imgAspect
+            startY = -(drawH - targetSize) / 2
+          }
+
+          sCtx.fillStyle = '#0a0a0a'
+          sCtx.fillRect(0, 0, targetSize, targetSize)
+          sCtx.drawImage(img, startX, startY, drawW, drawH)
+
+          const croppedImg = new Image()
+          croppedImg.src = squareCanvas.toDataURL('image/jpeg', 0.95)
+          croppedImg.onload = () => {
+            loaded.push(croppedImg)
             if (loaded.length === files.length) {
               setImages(loaded)
             }
@@ -73,49 +78,16 @@ export default function GeneradorCabeceraPro() {
     })
   }
 
-  const initParticles = () => {
-    const parts: Particle[] = []
-    for (let i = 0; i < 25; i++) {
-      parts.push({
-        x: Math.random() * 1080,
-        y: Math.random() * 1920,
-        size: Math.random() * 3 + 1,
-        speedY: -(Math.random() * 0.8 + 0.2),
-        alpha: Math.random() * 0.4 + 0.1,
-      })
-    }
-    particlesRef.current = parts
-  }
-
-  // Fondo minimalista y elegante
+  // Fondo sobrio estilo fanzine / mate
   const drawBackground = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    const bgGrad = ctx.createLinearGradient(0, 0, 0, height)
-    bgGrad.addColorStop(0, '#09090b')
-    bgGrad.addColorStop(0.5, '#18181b')
-    bgGrad.addColorStop(1, '#09090b')
-    ctx.fillStyle = bgGrad
+    // Negro profundo mate
+    ctx.fillStyle = '#0A0A0A'
     ctx.fillRect(0, 0, width, height)
 
-    // Viñeteado cinematográfico suave
-    const radGrad = ctx.createRadialGradient(540, 960, 400, 540, 960, 1200)
-    radGrad.addColorStop(0, 'rgba(0, 0, 0, 0)')
-    radGrad.addColorStop(1, 'rgba(0, 0, 0, 0.7)')
-    ctx.fillStyle = radGrad
-    ctx.fillRect(0, 0, width, height)
-
-    // Partículas sutiles de fondo
-    particlesRef.current.forEach((p) => {
-      p.y += p.speedY
-      if (p.y < -10) p.y = height + 10
-
-      ctx.save()
-      ctx.globalAlpha = p.alpha
-      ctx.fillStyle = '#ffffff'
-      ctx.beginPath()
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.restore()
-    })
+    // Detalle de tira superior e inferior neopunk discreta
+    ctx.fillStyle = '#FF2E93'
+    ctx.fillRect(0, 0, width, 16)
+    ctx.fillRect(0, height - 16, width, 16)
   }
 
   const renderFrame = (
@@ -123,16 +95,15 @@ export default function GeneradorCabeceraPro() {
     offsetY: number,
     showWinner: boolean,
     winnerImg: HTMLImageElement | null,
-    textProgress: number,
-    speedFactor: number
+    textProgress: number
   ) => {
     const width = 1080
     const height = 1920
     drawBackground(ctx, width, height)
 
-    const itemSize = 620
-    const gap = 100
-    const centerY = 850
+    const itemSize = 640
+    const gap = 90
+    const centerY = 860
     const stride = itemSize + gap
 
     if (images.length > 0) {
@@ -145,10 +116,10 @@ export default function GeneradorCabeceraPro() {
         const rawY = centerY + i * stride - offsetY
         const distFromCenter = rawY - centerY
 
-        if (Math.abs(distFromCenter) < 1200) {
-          const normDist = distFromCenter / 900
-          const scale = Math.max(0.6, 1 - Math.abs(normDist) * 0.35)
-          const opacity = Math.max(0.2, 1 - Math.abs(normDist) * 0.75)
+        if (Math.abs(distFromCenter) < 1150) {
+          const normDist = distFromCenter / 950
+          const scale = Math.max(0.7, 1 - Math.abs(normDist) * 0.28)
+          const opacity = Math.max(0.35, 1 - Math.abs(normDist) * 0.65)
 
           ctx.save()
           ctx.translate(540, rawY)
@@ -157,29 +128,18 @@ export default function GeneradorCabeceraPro() {
           const isWinner = img === winnerImg && showWinner
 
           if (isWinner) {
-            // Estilo ganador limpio: sutil sombra cálida y marco fino blanco/amarillo
-            ctx.shadowColor = 'rgba(255, 230, 0, 0.4)'
-            ctx.shadowBlur = 50
+            // Enmarcado sólido gráfico tipo imprenta/fanzine
+            ctx.fillStyle = '#FF2E93'
+            ctx.fillRect(-itemSize / 2 - 12, -itemSize / 2 - 12, itemSize + 24, itemSize + 24)
 
-            ctx.strokeStyle = '#FFE600'
-            ctx.lineWidth = 6
-            ctx.strokeRect(-itemSize / 2 - 4, -itemSize / 2 - 4, itemSize + 8, itemSize + 8)
+            ctx.fillStyle = '#0A0A0A'
+            ctx.fillRect(-itemSize / 2 - 4, -itemSize / 2 - 4, itemSize + 8, itemSize + 8)
           } else {
-            ctx.filter = `grayscale(100%) brightness(${0.25 + opacity * 0.25})`
+            // Escala de grises contrastada tipo prensa
+            ctx.filter = `grayscale(100%) contrast(140%) brightness(${0.3 + opacity * 0.3})`
           }
 
-          // Motion blur suave vertical en movimiento rápido
-          if (speedFactor > 0.02 && !isWinner) {
-            ctx.globalAlpha = 0.6
-            const blurOffset = Math.min(speedFactor * 90, 20)
-            ctx.drawImage(img, -itemSize / 2, -itemSize / 2 - blurOffset, itemSize, itemSize)
-            ctx.globalAlpha = opacity
-          }
-
-          // Dibujar portada cuadrada perfecta con esquinas sutiles (Clip Path)
-          ctx.beginPath()
-          ctx.roundRect(-itemSize / 2, -itemSize / 2, itemSize, itemSize, 12)
-          ctx.clip()
+          // Renderizado de la imagen
           ctx.drawImage(img, -itemSize / 2, -itemSize / 2, itemSize, itemSize)
 
           ctx.restore()
@@ -187,34 +147,26 @@ export default function GeneradorCabeceraPro() {
       })
     }
 
-    // Tipografía limpia, elegante y profesional
+    // Título Editorial
     if (textProgress > 0) {
       ctx.save()
-      ctx.globalAlpha = Math.min(1, textProgress * 2)
+      ctx.globalAlpha = Math.min(1, textProgress * 2.5)
 
-      const scale = 0.9 + textProgress * 0.1
-      ctx.translate(540, 1600)
-      ctx.scale(scale, scale)
+      ctx.translate(540, 1620)
 
-      // Caja tipográfica limpia mate
-      ctx.fillStyle = '#09090b'
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.9)'
-      ctx.shadowBlur = 25
-      ctx.beginPath()
-      ctx.roundRect(-440, -65, 880, 130, 8)
-      ctx.fill()
+      // Bloque sólido posterior rosa
+      ctx.fillStyle = '#FF2E93'
+      ctx.fillRect(-450, -68, 900, 120)
 
-      // Borde sutil minimalista
-      ctx.strokeStyle = '#27272a'
-      ctx.lineWidth = 2
-      ctx.stroke()
+      // Bloque delantero negro impreso
+      ctx.fillStyle = '#0A0A0A'
+      ctx.fillRect(-444, -62, 888, 108)
 
-      // Texto Principal Limpio
-      ctx.fillStyle = '#ffffff'
-      ctx.font = '700 48px system-ui, -apple-system, sans-serif'
+      // Texto tipográfico sobrio y potente
+      ctx.fillStyle = '#FFFFFF'
+      ctx.font = '900 48px system-ui, -apple-system, sans-serif'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      ctx.letterSpacing = '4px'
       ctx.fillText(albumTitle.toUpperCase(), 0, 0)
 
       ctx.restore()
@@ -232,33 +184,29 @@ export default function GeneradorCabeceraPro() {
       return
     }
 
-    initParticles()
-
     const winnerIdx = Math.max(0, winnerIndex - 1) % images.length
     const winnerImg = images[winnerIdx]
 
-    const itemSize = 620
-    const gap = 100
+    const itemSize = 640
+    const gap = 90
     const stride = itemSize + gap
 
-    // Parada en la quinta vuelta para mayor duración de giro fluido
+    // Parada limpia tras rotación fluida de 5 vueltas
     const targetGlobalIndex = images.length * 5 + winnerIdx
     const totalDistance = targetGlobalIndex * stride
 
     let startTime: number | null = null
-    const duration = 6500 // 6.5 segundos de giro suave y profesional
-    let prevOffsetY = 0
+    const duration = 6500 // 6.5 segundos de rotación constante y desaceleración orgánica
 
-    // Curva suave tipo Ease-Out Cúbico con frenado orgánico
-    const smoothEasing = (t: number): number => {
-      if (t < 0.15) return 3 * t * t * 0.1 // Arranque sutil
-      if (t < 0.9) {
-        const subT = (t - 0.15) / 0.75
-        return 0.05 + 0.9 * (1 - Math.pow(1 - subT, 3))
+    // Transición suave de inercia física (Sin botes artificiales)
+    const editorialEasing = (t: number): number => {
+      if (t < 0.15) return 2.2 * t * t
+      if (t < 0.88) {
+        const subT = (t - 0.15) / 0.73
+        return 0.05 + 0.88 * (1 - Math.pow(1 - subT, 3))
       }
-      const subT = (t - 0.9) / 0.1
-      const microBounce = Math.sin(subT * Math.PI) * 0.005 * (1 - subT)
-      return 0.95 + subT * 0.05 + microBounce
+      const subT = (t - 0.88) / 0.12
+      return 0.93 + subT * 0.07
     }
 
     const step = (timestamp: number) => {
@@ -266,17 +214,15 @@ export default function GeneradorCabeceraPro() {
       const elapsed = timestamp - startTime
       const progress = Math.min(elapsed / duration, 1)
 
-      const easeProgress = smoothEasing(progress)
+      const easeProgress = editorialEasing(progress)
       const currentOffsetY = totalDistance * easeProgress
-      const speedFactor = Math.abs(currentOffsetY - prevOffsetY)
-      prevOffsetY = currentOffsetY
 
-      const isFinished = progress >= 0.98
-      const textProgress = progress >= 0.9 ? Math.min((elapsed - duration * 0.9) / 450, 1) : 0
+      const isFinished = progress >= 0.985
+      const textProgress = progress >= 0.92 ? Math.min((elapsed - duration * 0.92) / 400, 1) : 0
 
-      renderFrame(ctx, currentOffsetY, isFinished, winnerImg, textProgress, speedFactor)
+      renderFrame(ctx, currentOffsetY, isFinished, winnerImg, textProgress)
 
-      if (elapsed < duration + 1000) {
+      if (elapsed < duration + 900) {
         requestAnimationFrame(step)
       } else if (onComplete) {
         onComplete()
@@ -301,14 +247,14 @@ export default function GeneradorCabeceraPro() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `reel-cabecera-pro-${Date.now()}.mp4`
+      a.download = `reel-cabecera-punk-${Date.now()}.mp4`
       a.click()
       setIsRecording(false)
     }
 
     recorder.start()
     runAnimation(() => {
-      setTimeout(() => recorder.stop(), 500)
+      setTimeout(() => recorder.stop(), 450)
     })
   }
 
@@ -317,7 +263,6 @@ export default function GeneradorCabeceraPro() {
     if (canvas && isAuthenticated) {
       const ctx = canvas.getContext('2d')
       if (ctx) {
-        initParticles()
         drawBackground(ctx, 1080, 1920)
       }
     }
@@ -332,7 +277,7 @@ export default function GeneradorCabeceraPro() {
             <h1 className="font-display text-xl uppercase tracking-wider">Acceso Restringido</h1>
           </div>
           <p className="text-sm text-zinc-400 font-mono">
-            Introduce la clave secreta para acceder al generador Ultra-Pro.
+            Introduce la clave secreta para acceder a la herramienta.
           </p>
           <div>
             <input
@@ -371,17 +316,17 @@ export default function GeneradorCabeceraPro() {
               <ArrowLeft className="size-4" /> Salir
             </Link>
             <span className="flex items-center gap-1 text-xs text-emerald-400 font-mono bg-emerald-950/50 px-2.5 py-1 rounded border border-emerald-800">
-              <ShieldCheck className="size-3.5" /> 6.5s Smooth Edition
+              <ShieldCheck className="size-3.5" /> Editorial Punk
             </span>
           </div>
 
-          <h1 className="font-display text-2xl uppercase text-punk-pink flex items-center gap-2">
-            <Sparkles className="size-6 text-punk-yellow" /> Cabecera Pro Reels
+          <h1 className="font-display text-2xl uppercase text-punk-pink">
+            Generador Cabecera Reels
           </h1>
 
           <div className="space-y-5 text-sm font-mono">
             <div>
-              <label className="block mb-2 text-zinc-300">1. Portadas (Adaptación Automática):</label>
+              <label className="block mb-2 text-zinc-300">1. Portadas (Recorte Proporcional):</label>
               <input
                 type="file"
                 multiple
@@ -390,7 +335,7 @@ export default function GeneradorCabeceraPro() {
                 className="w-full bg-zinc-800 border border-zinc-700 p-2.5 rounded text-xs text-zinc-300 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-punk-pink file:text-white font-mono cursor-pointer"
               />
               <span className="text-xs text-punk-yellow mt-2 block font-semibold">
-                ✓ {images.length} portadas cuadradas listas
+                ✓ {images.length} portadas listas
               </span>
             </div>
 
@@ -423,8 +368,31 @@ export default function GeneradorCabeceraPro() {
                 disabled={isRecording}
                 className="w-full py-3.5 bg-zinc-800 hover:bg-zinc-700 font-bold uppercase rounded flex items-center justify-center gap-2 border border-white/10 text-zinc-200 transition-colors"
               >
-                <Play className="size-4 text-punk-yellow" /> Probar Animación Smooth
+                <Play className="size-4 text-punk-yellow" /> Vista Previa (6.5s)
               </button>
 
               <button
-                onClick
+                onClick={handleRecordVideo}
+                disabled={isRecording}
+                className="w-full py-4 bg-punk-pink hover:bg-pink-600 font-bold uppercase rounded text-white flex items-center justify-center gap-2 shadow-xl text-base tracking-wide transition-all"
+              >
+                <Video className="size-5" />
+                {isRecording ? 'Renderizando MP4...' : 'Exportar Vídeo (.mp4)'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Lienzo Canvas 9:16 HD */}
+        <div className="lg:col-span-7 flex items-center justify-center bg-zinc-950 p-6 rounded-xl border border-white/10">
+          <canvas
+            ref={canvasRef}
+            width={1080}
+            height={1920}
+            className="h-[75vh] aspect-[9/16] rounded-lg shadow-2xl border border-white/10 object-contain"
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
