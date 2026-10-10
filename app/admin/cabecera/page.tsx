@@ -27,7 +27,7 @@ export default function GeneradorCabeceraPunkPro() {
     }
   }
 
-  // Carga de imágenes sin deformación (Crop tipo object-cover)
+  // Carga de imágenes sin deformación (Crop 1:1 proporcional)
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
     const files = Array.from(e.target.files)
@@ -37,7 +37,6 @@ export default function GeneradorCabeceraPunkPro() {
       const img = new Image()
       img.src = URL.createObjectURL(file)
       img.onload = () => {
-        // Lienzo auxiliar para recorte 1:1 proporcional
         const squareCanvas = document.createElement('canvas')
         const targetSize = 800
         squareCanvas.width = targetSize
@@ -52,11 +51,9 @@ export default function GeneradorCabeceraPunkPro() {
           let startY = 0
 
           if (imgAspect > 1) {
-            // Imagen panorámica
             drawW = targetSize * imgAspect
             startX = -(drawW - targetSize) / 2
           } else if (imgAspect < 1) {
-            // Imagen vertical
             drawH = targetSize / imgAspect
             startY = -(drawH - targetSize) / 2
           }
@@ -78,16 +75,25 @@ export default function GeneradorCabeceraPunkPro() {
     })
   }
 
-  // Fondo sobrio estilo fanzine / mate
-  const drawBackground = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    // Negro profundo mate
+  const drawBackground = (ctx: CanvasRenderingContext2D, width: number, height: number, showGlow: boolean) => {
+    // Fondo negro mate profundo
     ctx.fillStyle = '#0A0A0A'
     ctx.fillRect(0, 0, width, height)
 
-    // Detalle de tira superior e inferior neopunk discreta
+    // Degradado radial tenue en el centro cuando se selecciona el álbum
+    if (showGlow) {
+      const radial = ctx.createRadialGradient(width / 2, height / 2, 100, width / 2, height / 2, 900)
+      radial.addColorStop(0, 'rgba(255, 46, 147, 0.18)')
+      radial.addColorStop(0.5, 'rgba(255, 230, 0, 0.08)')
+      radial.addColorStop(1, 'rgba(0, 0, 0, 0)')
+      ctx.fillStyle = radial
+      ctx.fillRect(0, 0, width, height)
+    }
+
+    // Franjas decorativas superior e inferior (Las fotos pasan por debajo)
     ctx.fillStyle = '#FF2E93'
-    ctx.fillRect(0, 0, width, 16)
-    ctx.fillRect(0, height - 16, width, 16)
+    ctx.fillRect(0, 0, width, 24)
+    ctx.fillRect(0, height - 24, width, 24)
   }
 
   const renderFrame = (
@@ -99,7 +105,9 @@ export default function GeneradorCabeceraPunkPro() {
   ) => {
     const width = 1080
     const height = 1920
-    drawBackground(ctx, width, height)
+
+    // Dibujar fondo y habilitar glow central si hay ganador
+    drawBackground(ctx, width, height, showWinner)
 
     const itemSize = 640
     const gap = 90
@@ -116,10 +124,11 @@ export default function GeneradorCabeceraPunkPro() {
         const rawY = centerY + i * stride - offsetY
         const distFromCenter = rawY - centerY
 
-        if (Math.abs(distFromCenter) < 1150) {
+        // Renderizamos con margen amplio para que crucen con naturalidad por las franjas
+        if (rawY > -itemSize && rawY < height + itemSize) {
           const normDist = distFromCenter / 950
-          const scale = Math.max(0.7, 1 - Math.abs(normDist) * 0.28)
-          const opacity = Math.max(0.35, 1 - Math.abs(normDist) * 0.65)
+          const scale = Math.max(0.65, 1 - Math.abs(normDist) * 0.28)
+          const opacity = Math.max(0.3, 1 - Math.abs(normDist) * 0.65)
 
           ctx.save()
           ctx.translate(540, rawY)
@@ -128,41 +137,38 @@ export default function GeneradorCabeceraPunkPro() {
           const isWinner = img === winnerImg && showWinner
 
           if (isWinner) {
-            // Enmarcado sólido gráfico tipo imprenta/fanzine
+            // Iluminación profesional y marco elegante al ser elegido
+            ctx.shadowColor = 'rgba(255, 230, 0, 0.5)'
+            ctx.shadowBlur = 45
+
             ctx.fillStyle = '#FF2E93'
             ctx.fillRect(-itemSize / 2 - 12, -itemSize / 2 - 12, itemSize + 24, itemSize + 24)
 
             ctx.fillStyle = '#0A0A0A'
             ctx.fillRect(-itemSize / 2 - 4, -itemSize / 2 - 4, itemSize + 8, itemSize + 8)
           } else {
-            // Escala de grises contrastada tipo prensa
+            // Escala de grises elegante para el resto
             ctx.filter = `grayscale(100%) contrast(140%) brightness(${0.3 + opacity * 0.3})`
           }
 
-          // Renderizado de la imagen
           ctx.drawImage(img, -itemSize / 2, -itemSize / 2, itemSize, itemSize)
-
           ctx.restore()
         }
       })
     }
 
-    // Título Editorial
     if (textProgress > 0) {
       ctx.save()
       ctx.globalAlpha = Math.min(1, textProgress * 2.5)
 
       ctx.translate(540, 1620)
 
-      // Bloque sólido posterior rosa
       ctx.fillStyle = '#FF2E93'
       ctx.fillRect(-450, -68, 900, 120)
 
-      // Bloque delantero negro impreso
       ctx.fillStyle = '#0A0A0A'
       ctx.fillRect(-444, -62, 888, 108)
 
-      // Texto tipográfico sobrio y potente
       ctx.fillStyle = '#FFFFFF'
       ctx.font = '900 48px system-ui, -apple-system, sans-serif'
       ctx.textAlign = 'center'
@@ -191,14 +197,13 @@ export default function GeneradorCabeceraPunkPro() {
     const gap = 90
     const stride = itemSize + gap
 
-    // Parada limpia tras rotación fluida de 5 vueltas
+    // Cálculo exacto para que caiga milimétricamente en la ganadora de la ronda 5
     const targetGlobalIndex = images.length * 5 + winnerIdx
     const totalDistance = targetGlobalIndex * stride
 
     let startTime: number | null = null
-    const duration = 6500 // 6.5 segundos de rotación constante y desaceleración orgánica
+    const duration = 6500
 
-    // Transición suave de inercia física (Sin botes artificiales)
     const editorialEasing = (t: number): number => {
       if (t < 0.15) return 2.2 * t * t
       if (t < 0.88) {
@@ -263,7 +268,7 @@ export default function GeneradorCabeceraPunkPro() {
     if (canvas && isAuthenticated) {
       const ctx = canvas.getContext('2d')
       if (ctx) {
-        drawBackground(ctx, 1080, 1920)
+        drawBackground(ctx, 1080, 1920, false)
       }
     }
   }, [isAuthenticated])
@@ -316,7 +321,7 @@ export default function GeneradorCabeceraPunkPro() {
               <ArrowLeft className="size-4" /> Salir
             </Link>
             <span className="flex items-center gap-1 text-xs text-emerald-400 font-mono bg-emerald-950/50 px-2.5 py-1 rounded border border-emerald-800">
-              <ShieldCheck className="size-3.5" /> Editorial Punk
+              <ShieldCheck className="size-3.5" /> Editorial Pro
             </span>
           </div>
 
