@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { ArrowLeft, Video, Play, Lock, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 
-const SECRET_PIN = '1234'
+const SECRET_PIN = 'dame-marcha-punk-2026'
 
 export default function GeneradorCabeceraPunkPro() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
@@ -27,7 +27,7 @@ export default function GeneradorCabeceraPunkPro() {
     }
   }
 
-  // Carga de imágenes sin deformación (Crop 1:1 proporcional)
+  // Carga de imágenes con recorte cuadrado perfecto 1:1 real (Sin deformación)
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
     const files = Array.from(e.target.files)
@@ -44,28 +44,18 @@ export default function GeneradorCabeceraPunkPro() {
         const sCtx = squareCanvas.getContext('2d')
 
         if (sCtx) {
-          const imgAspect = img.width / img.height
-          let drawW = targetSize
-          let drawH = targetSize
-          let startX = 0
-          let startY = 0
+          const minDim = Math.min(img.width, img.height)
+          const sx = (img.width - minDim) / 2
+          const sy = (img.height - minDim) / 2
 
-          if (imgAspect > 1) {
-            drawW = targetSize * imgAspect
-            startX = -(drawW - targetSize) / 2
-          } else if (imgAspect < 1) {
-            drawH = targetSize / imgAspect
-            startY = -(drawH - targetSize) / 2
-          }
-
-          sCtx.fillStyle = '#0a0a0a'
+          sCtx.fillStyle = '#0A0A0A'
           sCtx.fillRect(0, 0, targetSize, targetSize)
-          sCtx.drawImage(img, startX, startY, drawW, drawH)
+          sCtx.drawImage(img, sx, sy, minDim, minDim, 0, 0, targetSize, targetSize)
 
-          const croppedImg = new Image()
-          croppedImg.src = squareCanvas.toDataURL('image/jpeg', 0.95)
-          croppedImg.onload = () => {
-            loaded.push(croppedImg)
+          const squareImg = new Image()
+          squareImg.src = squareCanvas.toDataURL('image/jpeg', 0.98)
+          squareImg.onload = () => {
+            loaded.push(squareImg)
             if (loaded.length === files.length) {
               setImages(loaded)
             }
@@ -76,21 +66,19 @@ export default function GeneradorCabeceraPunkPro() {
   }
 
   const drawBackground = (ctx: CanvasRenderingContext2D, width: number, height: number, showGlow: boolean) => {
-    // Fondo negro mate profundo
     ctx.fillStyle = '#0A0A0A'
     ctx.fillRect(0, 0, width, height)
 
-    // Degradado radial tenue en el centro cuando se selecciona el álbum
+    // Degradado radial tenue central limpio (sin amarillo, solo profundidad neutra)
     if (showGlow) {
-      const radial = ctx.createRadialGradient(width / 2, height / 2, 100, width / 2, height / 2, 900)
-      radial.addColorStop(0, 'rgba(255, 46, 147, 0.18)')
-      radial.addColorStop(0.5, 'rgba(255, 230, 0, 0.08)')
+      const radial = ctx.createRadialGradient(width / 2, 860, 50, width / 2, 860, 850)
+      radial.addColorStop(0, 'rgba(255, 46, 147, 0.12)')
       radial.addColorStop(1, 'rgba(0, 0, 0, 0)')
       ctx.fillStyle = radial
       ctx.fillRect(0, 0, width, height)
     }
 
-    // Franjas decorativas superior e inferior (Las fotos pasan por debajo)
+    // Franjas decorativas superior e inferior
     ctx.fillStyle = '#FF2E93'
     ctx.fillRect(0, 0, width, 24)
     ctx.fillRect(0, height - 24, width, 24)
@@ -106,7 +94,6 @@ export default function GeneradorCabeceraPunkPro() {
     const width = 1080
     const height = 1920
 
-    // Dibujar fondo y habilitar glow central si hay ganador
     drawBackground(ctx, width, height, showWinner)
 
     const itemSize = 640
@@ -116,7 +103,7 @@ export default function GeneradorCabeceraPunkPro() {
 
     if (images.length > 0) {
       const totalLoopImages: HTMLImageElement[] = []
-      for (let r = 0; r < 8; r++) {
+      for (let r = 0; r < 10; r++) {
         totalLoopImages.push(...images)
       }
 
@@ -124,7 +111,6 @@ export default function GeneradorCabeceraPunkPro() {
         const rawY = centerY + i * stride - offsetY
         const distFromCenter = rawY - centerY
 
-        // Renderizamos con margen amplio para que crucen con naturalidad por las franjas
         if (rawY > -itemSize && rawY < height + itemSize) {
           const normDist = distFromCenter / 950
           const scale = Math.max(0.65, 1 - Math.abs(normDist) * 0.28)
@@ -137,17 +123,13 @@ export default function GeneradorCabeceraPunkPro() {
           const isWinner = img === winnerImg && showWinner
 
           if (isWinner) {
-            // Iluminación profesional y marco elegante al ser elegido
-            ctx.shadowColor = 'rgba(255, 230, 0, 0.5)'
-            ctx.shadowBlur = 45
-
+            // Marco sólido de imprenta limpia (Sin brillos amarillos, solo contraste estricto)
             ctx.fillStyle = '#FF2E93'
             ctx.fillRect(-itemSize / 2 - 12, -itemSize / 2 - 12, itemSize + 24, itemSize + 24)
 
             ctx.fillStyle = '#0A0A0A'
             ctx.fillRect(-itemSize / 2 - 4, -itemSize / 2 - 4, itemSize + 8, itemSize + 8)
           } else {
-            // Escala de grises elegante para el resto
             ctx.filter = `grayscale(100%) contrast(140%) brightness(${0.3 + opacity * 0.3})`
           }
 
@@ -191,15 +173,15 @@ export default function GeneradorCabeceraPunkPro() {
     }
 
     const winnerIdx = Math.max(0, winnerIndex - 1) % images.length
-    const winnerImg = images[winnerIdx]
-
     const itemSize = 640
     const gap = 90
     const stride = itemSize + gap
 
-    // Cálculo exacto para que caiga milimétricamente en la ganadora de la ronda 5
-    const targetGlobalIndex = images.length * 5 + winnerIdx
+    const targetLoopRound = 5
+    const targetGlobalIndex = targetLoopRound * images.length + winnerIdx
     const totalDistance = targetGlobalIndex * stride
+
+    const winnerImg = images[winnerIdx]
 
     let startTime: number | null = null
     const duration = 6500
@@ -331,7 +313,7 @@ export default function GeneradorCabeceraPunkPro() {
 
           <div className="space-y-5 text-sm font-mono">
             <div>
-              <label className="block mb-2 text-zinc-300">1. Portadas (Recorte Proporcional):</label>
+              <label className="block mb-2 text-zinc-300">1. Portadas (Cuadradas 1:1 sin deformar):</label>
               <input
                 type="file"
                 multiple
@@ -340,7 +322,7 @@ export default function GeneradorCabeceraPunkPro() {
                 className="w-full bg-zinc-800 border border-zinc-700 p-2.5 rounded text-xs text-zinc-300 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-punk-pink file:text-white font-mono cursor-pointer"
               />
               <span className="text-xs text-punk-yellow mt-2 block font-semibold">
-                ✓ {images.length} portadas listas
+                ✓ {images.length} portadas listas y recortadas
               </span>
             </div>
 
