@@ -6,7 +6,7 @@ excerpt: La película dirigida por Los Javis fue estrenada el pasado 25 de
 author: Aroha Moreno
 section: cine
 category: analisis-de-cine
-image: https://3ejmd55n1g.ucarecd.net/9084175b-a0a0-4c47-b1d8-08bf6fc902a3/-/crop/800x342/0,54/-/preview/
+image: https://3ejmd55n1g.ucarecd.net/bba5b127-735e-4233-8eec-7cbe557a1d70/-/crop/2560x1097/0,305/-/preview/
 featured: true
 ---
 *La bola negra* es uno de esos largometrajes que no se ven, que no se analizan, sino que se sienten. En una sala de cine completa, varias generaciones unidas para 2 horas y media de la mayor muestra de vida a través de la muerte. 
