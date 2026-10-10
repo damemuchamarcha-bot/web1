@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { ArrowLeft, Video, Play, Lock, ShieldCheck, Sparkles, Sliders } from 'lucide-react'
+import { ArrowLeft, Video, Play, Lock, ShieldCheck, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 
 const SECRET_PIN = 'dame-marcha-punk-2026'
@@ -12,7 +12,6 @@ interface Particle {
   size: number
   speedY: number
   alpha: number
-  color: string
 }
 
 export default function GeneradorCabeceraPro() {
@@ -38,6 +37,7 @@ export default function GeneradorCabeceraPro() {
     }
   }
 
+  // Carga y adaptación automática de cualquier imagen a cuadrado perfecto
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
     const files = Array.from(e.target.files)
@@ -47,55 +47,70 @@ export default function GeneradorCabeceraPro() {
       const img = new Image()
       img.src = URL.createObjectURL(file)
       img.onload = () => {
-        loaded.push(img)
-        if (loaded.length === files.length) {
-          setImages(loaded)
+        // Creamos un canvas auxiliar para recortar la imagen en formato cuadrado exacto (Cover)
+        const squareCanvas = document.createElement('canvas')
+        const size = 800
+        squareCanvas.width = size
+        squareCanvas.height = size
+        const sCtx = squareCanvas.getContext('2d')
+        
+        if (sCtx) {
+          const minDim = Math.min(img.width, img.height)
+          const sx = (img.width - minDim) / 2
+          const sy = (img.height - minDim) / 2
+          sCtx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size)
+
+          const squareImg = new Image()
+          squareImg.src = squareCanvas.toDataURL('image/jpeg', 0.95)
+          squareImg.onload = () => {
+            loaded.push(squareImg)
+            if (loaded.length === files.length) {
+              setImages(loaded)
+            }
+          }
         }
       }
     })
   }
 
-  // Inicializar partículas de fondo
   const initParticles = () => {
     const parts: Particle[] = []
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < 25; i++) {
       parts.push({
         x: Math.random() * 1080,
         y: Math.random() * 1920,
-        size: Math.random() * 4 + 2,
-        speedY: -(Math.random() * 1.5 + 0.5),
-        alpha: Math.random() * 0.6 + 0.2,
-        color: Math.random() > 0.5 ? '#FFE600' : '#FF2E93',
+        size: Math.random() * 3 + 1,
+        speedY: -(Math.random() * 0.8 + 0.2),
+        alpha: Math.random() * 0.4 + 0.1,
       })
     }
     particlesRef.current = parts
   }
 
-  // Renderizado del Fondo Cinematográfico
-  const drawBackground = (ctx: CanvasRenderingContext2D, width: number, height: number, time: number) => {
-    // Gradiente base Neo-Punk
+  // Fondo minimalista y elegante
+  const drawBackground = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
     const bgGrad = ctx.createLinearGradient(0, 0, 0, height)
-    bgGrad.addColorStop(0, '#0F0208')
-    bgGrad.addColorStop(0.5, '#FF2E93')
-    bgGrad.addColorStop(1, '#0A0004')
+    bgGrad.addColorStop(0, '#09090b')
+    bgGrad.addColorStop(0.5, '#18181b')
+    bgGrad.addColorStop(1, '#09090b')
     ctx.fillStyle = bgGrad
     ctx.fillRect(0, 0, width, height)
 
-    // Viñeteado de cámara / Estudio
-    const radGrad = ctx.createRadialGradient(540, 960, 250, 540, 960, 1100)
-    radGrad.addColorStop(0, 'rgba(0, 0, 0, 0.1)')
-    radGrad.addColorStop(1, 'rgba(0, 0, 0, 0.75)')
+    // Viñeteado cinematográfico suave
+    const radGrad = ctx.createRadialGradient(540, 960, 400, 540, 960, 1200)
+    radGrad.addColorStop(0, 'rgba(0, 0, 0, 0)')
+    radGrad.addColorStop(1, 'rgba(0, 0, 0, 0.7)')
     ctx.fillStyle = radGrad
     ctx.fillRect(0, 0, width, height)
 
-    // Partículas flotantes de luz
+    // Partículas sutiles de fondo
     particlesRef.current.forEach((p) => {
       p.y += p.speedY
       if (p.y < -10) p.y = height + 10
 
       ctx.save()
       ctx.globalAlpha = p.alpha
-      ctx.fillStyle = p.color
+      ctx.fillStyle = '#ffffff'
       ctx.beginPath()
       ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
       ctx.fill()
@@ -103,41 +118,26 @@ export default function GeneradorCabeceraPro() {
     })
   }
 
-  // Dibujar brillo especular circular tipo vinilo
-  const drawVinylSpecular = (ctx: CanvasRenderingContext2D, size: number) => {
-    ctx.save()
-    const specGrad = ctx.createLinearGradient(-size / 2, -size / 2, size / 2, size / 2)
-    specGrad.addColorStop(0, 'rgba(255, 255, 255, 0.25)')
-    specGrad.addColorStop(0.3, 'rgba(255, 255, 255, 0.0)')
-    specGrad.addColorStop(0.7, 'rgba(255, 255, 255, 0.0)')
-    specGrad.addColorStop(1, 'rgba(255, 255, 255, 0.15)')
-
-    ctx.fillStyle = specGrad
-    ctx.fillRect(-size / 2, -size / 2, size, size)
-    ctx.restore()
-  }
-
   const renderFrame = (
     ctx: CanvasRenderingContext2D,
     offsetY: number,
-    showWinnerGlow: boolean,
+    showWinner: boolean,
     winnerImg: HTMLImageElement | null,
     textProgress: number,
-    speedFactor: number,
-    time: number
+    speedFactor: number
   ) => {
     const width = 1080
     const height = 1920
-    drawBackground(ctx, width, height, time)
+    drawBackground(ctx, width, height)
 
-    const itemSize = 600
-    const gap = 120
-    const centerY = 880
+    const itemSize = 620
+    const gap = 100
+    const centerY = 850
     const stride = itemSize + gap
 
     if (images.length > 0) {
       const totalLoopImages: HTMLImageElement[] = []
-      for (let r = 0; r < 6; r++) {
+      for (let r = 0; r < 8; r++) {
         totalLoopImages.push(...images)
       }
 
@@ -145,85 +145,76 @@ export default function GeneradorCabeceraPro() {
         const rawY = centerY + i * stride - offsetY
         const distFromCenter = rawY - centerY
 
-        // Renderizado 3D en perspectiva de cilindro
-        if (Math.abs(distFromCenter) < 1100) {
+        if (Math.abs(distFromCenter) < 1200) {
           const normDist = distFromCenter / 900
-          const scale = Math.max(0.65, 1 - Math.abs(normDist) * 0.3)
-          const opacity = Math.max(0.3, 1 - Math.abs(normDist) * 0.6)
-          const rotateX = normDist * 0.45 // Inclinación 3D
+          const scale = Math.max(0.6, 1 - Math.abs(normDist) * 0.35)
+          const opacity = Math.max(0.2, 1 - Math.abs(normDist) * 0.75)
 
           ctx.save()
           ctx.translate(540, rawY)
           ctx.scale(scale, scale)
 
-          const isWinner = img === winnerImg && showWinnerGlow
+          const isWinner = img === winnerImg && showWinner
 
           if (isWinner) {
-            // Halo de Luz Neón Multicapa (Doble Resplandor)
-            ctx.shadowColor = '#FFE600'
-            ctx.shadowBlur = 110 + Math.sin(time * 0.01) * 20
-            
-            // Marco Rosa/Amarillo encendido
-            ctx.strokeStyle = '#FFE600'
-            ctx.lineWidth = 14
-            ctx.strokeRect(-itemSize / 2 - 8, -itemSize / 2 - 8, itemSize + 16, itemSize + 16)
+            // Estilo ganador limpio: sutil sombra cálida y marco fino blanco/amarillo
+            ctx.shadowColor = 'rgba(255, 230, 0, 0.4)'
+            ctx.shadowBlur = 50
 
-            ctx.strokeStyle = '#FF2E93'
+            ctx.strokeStyle = '#FFE600'
             ctx.lineWidth = 6
-            ctx.strokeRect(-itemSize / 2 - 20, -itemSize / 2 - 20, itemSize + 40, itemSize + 40)
+            ctx.strokeRect(-itemSize / 2 - 4, -itemSize / 2 - 4, itemSize + 8, itemSize + 8)
           } else {
-            ctx.filter = `grayscale(100%) brightness(${0.3 + opacity * 0.2})`
+            ctx.filter = `grayscale(100%) brightness(${0.25 + opacity * 0.25})`
           }
 
-          // Motion Blur vertical durante la aceleración
-          if (speedFactor > 0.01 && !isWinner) {
-            ctx.globalAlpha = 0.7
-            const blurOffset = Math.min(speedFactor * 140, 35)
+          // Motion blur suave vertical en movimiento rápido
+          if (speedFactor > 0.02 && !isWinner) {
+            ctx.globalAlpha = 0.6
+            const blurOffset = Math.min(speedFactor * 90, 20)
             ctx.drawImage(img, -itemSize / 2, -itemSize / 2 - blurOffset, itemSize, itemSize)
             ctx.globalAlpha = opacity
           }
 
-          // Dibujar Portada
+          // Dibujar portada cuadrada perfecta con esquinas sutiles (Clip Path)
+          ctx.beginPath()
+          ctx.roundRect(-itemSize / 2, -itemSize / 2, itemSize, itemSize, 12)
+          ctx.clip()
           ctx.drawImage(img, -itemSize / 2, -itemSize / 2, itemSize, itemSize)
-
-          // Reflejo Estilo Disco Vinilo
-          drawVinylSpecular(ctx, itemSize)
 
           ctx.restore()
         }
       })
     }
 
-    // Cartel Editorial con Título
+    // Tipografía limpia, elegante y profesional
     if (textProgress > 0) {
       ctx.save()
-      ctx.globalAlpha = Math.min(1, textProgress * 1.5)
+      ctx.globalAlpha = Math.min(1, textProgress * 2)
 
-      const scale = 0.8 + textProgress * 0.2
-      ctx.translate(540, 1580)
+      const scale = 0.9 + textProgress * 0.1
+      ctx.translate(540, 1600)
       ctx.scale(scale, scale)
 
-      // Sombra proyectada del cartel
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.85)'
-      ctx.shadowColor = '#FF2E93'
-      ctx.shadowBlur = 40
-      ctx.fillRect(-460, -80, 920, 140)
+      // Caja tipográfica limpia mate
+      ctx.fillStyle = '#09090b'
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.9)'
+      ctx.shadowBlur = 25
+      ctx.beginPath()
+      ctx.roundRect(-440, -65, 880, 130, 8)
+      ctx.fill()
 
-      // Borde Rosa Neón
-      ctx.strokeStyle = '#FF2E93'
-      ctx.lineWidth = 5
-      ctx.strokeRect(-460, -80, 920, 140)
-
-      // Borde Interior Amarillo
-      ctx.strokeStyle = '#FFE600'
+      // Borde sutil minimalista
+      ctx.strokeStyle = '#27272a'
       ctx.lineWidth = 2
-      ctx.strokeRect(-452, -72, 904, 124)
+      ctx.stroke()
 
-      // Texto Principal
-      ctx.fillStyle = '#FFFFFF'
-      ctx.font = '900 60px system-ui, sans-serif'
+      // Texto Principal Limpio
+      ctx.fillStyle = '#ffffff'
+      ctx.font = '700 48px system-ui, -apple-system, sans-serif'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
+      ctx.letterSpacing = '4px'
       ctx.fillText(albumTitle.toUpperCase(), 0, 0)
 
       ctx.restore()
@@ -237,7 +228,7 @@ export default function GeneradorCabeceraPro() {
     if (!ctx) return
 
     if (images.length === 0) {
-      alert('Sube al menos 3 o más portadas.')
+      alert('Sube al menos 3 portadas.')
       return
     }
 
@@ -246,33 +237,28 @@ export default function GeneradorCabeceraPro() {
     const winnerIdx = Math.max(0, winnerIndex - 1) % images.length
     const winnerImg = images[winnerIdx]
 
-    const itemSize = 600
-    const gap = 120
+    const itemSize = 620
+    const gap = 100
     const stride = itemSize + gap
 
-    // Parada exacta en la cuarta vuelta
-    const targetGlobalIndex = images.length * 4 + winnerIdx
+    // Parada en la quinta vuelta para mayor duración de giro fluido
+    const targetGlobalIndex = images.length * 5 + winnerIdx
     const totalDistance = targetGlobalIndex * stride
 
     let startTime: number | null = null
-    const duration = 4800 // 4.8 segundos cinematográficos
+    const duration = 6500 // 6.5 segundos de giro suave y profesional
     let prevOffsetY = 0
 
-    // Curva física con desaceleración y rebote elástico (Spring Effect)
-    const cubicPhysicsEasing = (t: number): number => {
-      if (t < 0.25) {
-        // Aceleración suave
-        return 2 * t * t * 0.2
+    // Curva suave tipo Ease-Out Cúbico con frenado orgánico
+    const smoothEasing = (t: number): number => {
+      if (t < 0.15) return 3 * t * t * 0.1 // Arranque sutil
+      if (t < 0.9) {
+        const subT = (t - 0.15) / 0.75
+        return 0.05 + 0.9 * (1 - Math.pow(1 - subT, 3))
       }
-      if (t < 0.88) {
-        // Giro principal a alta velocidad
-        const subT = (t - 0.25) / 0.63
-        return 0.12 + 0.85 * (1 - Math.pow(1 - subT, 3))
-      }
-      // Encaje elástico final (Spring overshoot)
-      const subT = (t - 0.88) / 0.12
-      const bounce = Math.sin(subT * Math.PI * 1.8) * Math.exp(-subT * 4.5) * 0.015
-      return 0.97 + subT * 0.03 + bounce
+      const subT = (t - 0.9) / 0.1
+      const microBounce = Math.sin(subT * Math.PI) * 0.005 * (1 - subT)
+      return 0.95 + subT * 0.05 + microBounce
     }
 
     const step = (timestamp: number) => {
@@ -280,17 +266,17 @@ export default function GeneradorCabeceraPro() {
       const elapsed = timestamp - startTime
       const progress = Math.min(elapsed / duration, 1)
 
-      const easeProgress = cubicPhysicsEasing(progress)
+      const easeProgress = smoothEasing(progress)
       const currentOffsetY = totalDistance * easeProgress
       const speedFactor = Math.abs(currentOffsetY - prevOffsetY)
       prevOffsetY = currentOffsetY
 
       const isFinished = progress >= 0.98
-      const textProgress = progress >= 0.93 ? Math.min((elapsed - duration * 0.93) / 400, 1) : 0
+      const textProgress = progress >= 0.9 ? Math.min((elapsed - duration * 0.9) / 450, 1) : 0
 
-      renderFrame(ctx, currentOffsetY, isFinished, winnerImg, textProgress, speedFactor, elapsed)
+      renderFrame(ctx, currentOffsetY, isFinished, winnerImg, textProgress, speedFactor)
 
-      if (elapsed < duration + 900) {
+      if (elapsed < duration + 1000) {
         requestAnimationFrame(step)
       } else if (onComplete) {
         onComplete()
@@ -315,7 +301,7 @@ export default function GeneradorCabeceraPro() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `reel-cabecera-${Date.now()}.mp4`
+      a.download = `reel-cabecera-pro-${Date.now()}.mp4`
       a.click()
       setIsRecording(false)
     }
@@ -332,7 +318,7 @@ export default function GeneradorCabeceraPro() {
       const ctx = canvas.getContext('2d')
       if (ctx) {
         initParticles()
-        drawBackground(ctx, 1080, 1920, 0)
+        drawBackground(ctx, 1080, 1920)
       }
     }
   }, [isAuthenticated])
@@ -375,7 +361,7 @@ export default function GeneradorCabeceraPro() {
   return (
     <div className="min-h-screen bg-punk-black text-white p-6">
       <div className="max-w-6xl mx-auto grid gap-8 lg:grid-cols-12">
-        {/* Panel de Control Pro */}
+        {/* Panel de Control */}
         <div className="lg:col-span-5 space-y-6 bg-zinc-900/90 p-6 rounded-xl border border-white/10 shadow-2xl">
           <div className="flex items-center justify-between">
             <Link
@@ -385,7 +371,7 @@ export default function GeneradorCabeceraPro() {
               <ArrowLeft className="size-4" /> Salir
             </Link>
             <span className="flex items-center gap-1 text-xs text-emerald-400 font-mono bg-emerald-950/50 px-2.5 py-1 rounded border border-emerald-800">
-              <ShieldCheck className="size-3.5" /> Modo Cinema 60FPS
+              <ShieldCheck className="size-3.5" /> 6.5s Smooth Edition
             </span>
           </div>
 
@@ -395,7 +381,7 @@ export default function GeneradorCabeceraPro() {
 
           <div className="space-y-5 text-sm font-mono">
             <div>
-              <label className="block mb-2 text-zinc-300">1. Portadas de la Ruleta:</label>
+              <label className="block mb-2 text-zinc-300">1. Portadas (Adaptación Automática):</label>
               <input
                 type="file"
                 multiple
@@ -404,7 +390,7 @@ export default function GeneradorCabeceraPro() {
                 className="w-full bg-zinc-800 border border-zinc-700 p-2.5 rounded text-xs text-zinc-300 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-punk-pink file:text-white font-mono cursor-pointer"
               />
               <span className="text-xs text-punk-yellow mt-2 block font-semibold">
-                ✓ {images.length} portadas en cola
+                ✓ {images.length} portadas cuadradas listas
               </span>
             </div>
 
@@ -437,31 +423,8 @@ export default function GeneradorCabeceraPro() {
                 disabled={isRecording}
                 className="w-full py-3.5 bg-zinc-800 hover:bg-zinc-700 font-bold uppercase rounded flex items-center justify-center gap-2 border border-white/10 text-zinc-200 transition-colors"
               >
-                <Play className="size-4 text-punk-yellow" /> Probar Animación 3D
+                <Play className="size-4 text-punk-yellow" /> Probar Animación Smooth
               </button>
 
               <button
-                onClick={handleRecordVideo}
-                disabled={isRecording}
-                className="w-full py-4 bg-punk-pink hover:bg-pink-600 font-bold uppercase rounded text-white flex items-center justify-center gap-2 shadow-xl text-base tracking-wide transition-all"
-              >
-                <Video className="size-5" />
-                {isRecording ? 'Renderizando 60FPS MP4...' : 'Exportar Vídeo Cinema (.mp4)'}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Lienzo Canvas 9:16 HD */}
-        <div className="lg:col-span-7 flex items-center justify-center bg-zinc-950 p-6 rounded-xl border border-white/10">
-          <canvas
-            ref={canvasRef}
-            width={1080}
-            height={1920}
-            className="h-[75vh] aspect-[9/16] rounded-lg shadow-2xl border border-white/10 object-contain"
-          />
-        </div>
-      </div>
-    </div>
-  )
-}
+                onClick
