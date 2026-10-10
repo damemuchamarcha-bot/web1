@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { ArrowLeft, Video, Play, Lock, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 
-const SECRET_PIN = 'dame-marcha-punk-2026'
+const SECRET_PIN = '1234'
 
 export default function GeneradorCabeceraPunkPro() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
