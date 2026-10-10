@@ -11,7 +11,7 @@ featured: true
 ---
 *La bola negra* es uno de esos largometrajes que no se ven, que no se analizan, sino que se sienten. En una sala de cine completa, varias generaciones unidas para 2 horas y media de la mayor muestra de vida a través de la muerte. 
 
-![](https://3ejmd55n1g.ucarecd.net/9517d546-9b0e-4284-b117-3115ae980af3/ "Guitarricadelafuente en La Bola Negra")
+![Guitarricadelafuente en La Bola Negra](https://3ejmd55n1g.ucarecd.net/9517d546-9b0e-4284-b117-3115ae980af3/ "Guitarricadelafuente en La Bola Negra")
 
 Tres historias que confluyen en distintas épocas pero que tienen un hilo conductor en común: la humanidad y el amor. 
 
