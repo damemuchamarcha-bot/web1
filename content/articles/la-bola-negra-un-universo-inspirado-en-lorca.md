@@ -23,7 +23,7 @@ Cuenta con una dirección impecable de **Los Javis**, y actuaciones honorables d
 
 <https://open.spotify.com/track/6W4fSGsqNmyPTYo29rJ50z>
 
-Más allá de su aspecto técnico, cabe resaltar la banda sonora: una versión celestial de “Soldadito español” de Judeline; “La nieve”, canción original de Guitarricadelafuente y las composiciones de Raúl Refree junto a la orquesta de Viena, dan lugar a la creación de un elemento que se constituye como un personaje más, la música. 
+Más allá de su aspecto técnico, cabe resaltar la banda sonora: una versión celestial de “**Soldadito español” de Judeline; “La nieve”**, canción original de **Guitarricadelafuente** y las composiciones de **Raúl Refree** junto a la **orquesta de Viena**, dan lugar a la creación de un elemento que se constituye como un personaje más, la música. 
 
 ![](https://3ejmd55n1g.ucarecd.net/26aceaa7-a3cb-4a6b-b5be-dc17c7d5bbfb/ "Los Javis con Guitarricadelafuente en La Bola Negra")
 
