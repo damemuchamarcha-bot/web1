@@ -27,7 +27,7 @@ export default function GeneradorCabeceraPunkPro() {
     }
   }
 
-  // Carga de imágenes con recorte proporcional estricto 1:1 y limpieza segura
+  // Carga de imágenes con recorte proporcional estricto 1:1
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
     const files = Array.from(e.target.files)
@@ -169,9 +169,10 @@ export default function GeneradorCabeceraPunkPro() {
 
     drawTopOverlay(ctx, width, height)
 
+    // El texto aparece progresivamente solo cuando textProgress > 0 (después del revelado de la foto)
     if (textProgress > 0) {
       ctx.save()
-      ctx.globalAlpha = Math.min(1, textProgress * 2.5)
+      ctx.globalAlpha = Math.min(1, textProgress * 2.2)
 
       const textScale = 0.95 + textProgress * 0.05
       ctx.translate(540, 1620)
@@ -224,7 +225,7 @@ export default function GeneradorCabeceraPunkPro() {
       const winnerImg = images[winnerIdx]
 
       let startTime: number | null = null
-      const duration = 6500
+      const duration = 6000 // 6 segundos de rotación y frenado
 
       const ultraSmoothEasing = (t: number): number => {
         if (t < 0.5) {
@@ -242,15 +243,21 @@ export default function GeneradorCabeceraPunkPro() {
         const easeProgress = ultraSmoothEasing(progress)
         const currentOffsetY = totalDistance * easeProgress
 
+        // FASE 1: Se completa el movimiento de la ruleta (parada exacta)
         const isFinished = progress >= 0.985
-        const colorTransitionProgress = isFinished ? Math.min((elapsed - duration * 0.985) / 500, 1) : 0
-        const glowAlpha = isFinished ? Math.min((elapsed - duration * 0.985) / 450, 1) : 0
-        const textProgress = progress >= 0.9 ? Math.min((elapsed - duration * 0.9) / 500, 1) : 0
+
+        // FASE 2: Transición de color de la imagen ganadora (inmediatamente al parar)
+        const colorTransitionProgress = isFinished ? Math.min((elapsed - duration * 0.985) / 400, 1) : 0
+        const glowAlpha = isFinished ? Math.min((elapsed - duration * 0.985) / 400, 1) : 0
+
+        // FASE 3: El texto aparece únicamente TRAS haberse revelado la foto (con un offset de tiempo)
+        const textStartThreshold = duration + 350
+        const textProgress = elapsed >= textStartThreshold ? Math.min((elapsed - textStartThreshold) / 450, 1) : 0
 
         renderFrame(ctx, currentOffsetY, isFinished, winnerImg, textProgress, glowAlpha, colorTransitionProgress)
 
-        // Mantenemos renderizando hasta completar totalmente la animación y la transición final de color
-        if (elapsed < duration + 1000) {
+        // Se mantiene la escena en pantalla hasta completar la secuencia completa del texto (+1.2s de remate)
+        if (elapsed < duration + 1400) {
           requestAnimationFrame(step)
         } else {
           resolve()
@@ -273,7 +280,6 @@ export default function GeneradorCabeceraPunkPro() {
     setIsRecording(true)
     const stream = canvas.captureStream(60)
 
-    // Selección de códec priorizando MP4 H.264
     const mimeTypesToTry = [
       'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
       'video/mp4;codecs=avc1',
@@ -311,13 +317,10 @@ export default function GeneradorCabeceraPunkPro() {
       setIsRecording(false)
     }
 
-    // Iniciar grabación volcando fragmentos constantemente
     recorder.start(100)
 
-    // Ejecutar animación completa
     await runAnimation()
 
-    // Búfer adicional de 1.2s para retener el plano final
     setTimeout(() => {
       if (recorder.state !== 'inactive') {
         recorder.stop()
