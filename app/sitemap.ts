@@ -5,7 +5,8 @@ import { articles } from '@/lib/articles'
 export const dynamic = 'force-static'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://damemarcha.com'
+  // Configurado explícitamente con las 'www'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.damemarcha.com'
 
   const articleUrls = articles.map((article) => ({
     url: `${baseUrl}/articulo/${article.slug}`,
