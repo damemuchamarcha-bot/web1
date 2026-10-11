@@ -65,40 +65,33 @@ export default function GeneradorCabeceraPunkPro() {
     })
   }
 
-  // Fondo y Resplandor Radial
+  // Fondo Negro Mate con Profundidad y Resplandor Radial Tenue
   const drawBackground = (ctx: CanvasRenderingContext2D, width: number, height: number, glowAlpha: number) => {
-    // Fondo Rosa Neón
-    ctx.fillStyle = '#FF2E93'
+    // Negro profundo mate
+    ctx.fillStyle = '#0A0A0A'
     ctx.fillRect(0, 0, width, height)
 
-    // Viñeteado cinematográfico
-    const vignette = ctx.createRadialGradient(width / 2, 860, 200, width / 2, 860, 1100)
-    vignette.addColorStop(0, 'rgba(0,0,0,0.12)')
-    vignette.addColorStop(1, 'rgba(0,0,0,0.65)')
-    ctx.fillStyle = vignette
-    ctx.fillRect(0, 0, width, height)
-
-    // Destello de iluminación suave al seleccionarse
+    // Resplandor radial central sutil para dar profundidad al ganar
     if (glowAlpha > 0) {
-      const organicGlow = ctx.createRadialGradient(width / 2, 860, 80, width / 2, 860, 700)
-      organicGlow.addColorStop(0, `rgba(255, 255, 255, ${0.35 * glowAlpha})`)
-      organicGlow.addColorStop(0.5, `rgba(255, 230, 245, ${0.15 * glowAlpha})`)
-      organicGlow.addColorStop(1, 'rgba(0, 0, 0, 0)')
-      ctx.fillStyle = organicGlow
+      const radial = ctx.createRadialGradient(width / 2, 860, 50, width / 2, 860, 850)
+      radial.addColorStop(0, `rgba(255, 46, 147, ${0.18 * glowAlpha})`)
+      radial.addColorStop(0.6, `rgba(255, 255, 255, ${0.05 * glowAlpha})`)
+      radial.addColorStop(1, 'rgba(0, 0, 0, 0)')
+      ctx.fillStyle = radial
       ctx.fillRect(0, 0, width, height)
     }
   }
 
-  // Franjas de corte superior e inferior (capa superior overlay)
+  // Franjas de corte superior e inferior (Capa Overlay)
   const drawTopOverlay = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    ctx.fillStyle = '#FF2E93'
+    ctx.fillStyle = '#0A0A0A'
     ctx.fillRect(0, 0, width, 32)
     ctx.fillRect(0, height - 32, width, 32)
 
-    // Línea de separación negra mate
-    ctx.fillStyle = '#0A0A0A'
-    ctx.fillRect(0, 32, width, 4)
-    ctx.fillRect(0, height - 36, width, 4)
+    // Líneas de acento sutiles
+    ctx.fillStyle = '#FF2E93'
+    ctx.fillRect(0, 32, width, 3)
+    ctx.fillRect(0, height - 35, width, 3)
   }
 
   const renderFrame = (
@@ -107,7 +100,8 @@ export default function GeneradorCabeceraPunkPro() {
     showWinner: boolean,
     winnerImg: HTMLImageElement | null,
     textProgress: number,
-    glowAlpha: number
+    glowAlpha: number,
+    colorTransitionProgress: number
   ) => {
     const width = 1080
     const height = 1920
@@ -143,31 +137,35 @@ export default function GeneradorCabeceraPunkPro() {
           const isWinner = img === winnerImg && showWinner
 
           if (isWinner) {
-            // Sombra sutil de la portada ganadora
-            ctx.shadowColor = `rgba(0, 0, 0, ${0.5 * glowAlpha})`
-            ctx.shadowBlur = 50
+            // Sombra suave en la portada ganadora
+            ctx.shadowColor = `rgba(0, 0, 0, ${0.6 * glowAlpha})`
+            ctx.shadowBlur = 40
 
-            // Marco de imprenta
+            // Marco de imprenta elegante
+            ctx.fillStyle = '#FF2E93'
+            ctx.fillRect(-itemSize / 2 - 10, -itemSize / 2 - 10, itemSize + 20, itemSize + 20)
+
             ctx.fillStyle = '#0A0A0A'
-            ctx.fillRect(-itemSize / 2 - 12, -itemSize / 2 - 12, itemSize + 24, itemSize + 24)
+            ctx.fillRect(-itemSize / 2 - 3, -itemSize / 2 - 3, itemSize + 6, itemSize + 6)
 
-            ctx.fillStyle = '#FFFFFF'
-            ctx.fillRect(-itemSize / 2 - 4, -itemSize / 2 - 4, itemSize + 8, itemSize + 8)
-
-            // Filtro de brillo sutil en la imagen ganadora
-            ctx.filter = `brightness(${1.0 + 0.15 * glowAlpha}) contrast(${1.0 + 0.08 * glowAlpha})`
+            // Transición suave de escala de grises a color real (Sin parpadeo brusco)
+            if (colorTransitionProgress < 1) {
+              ctx.filter = `grayscale(${1 - colorTransitionProgress}) brightness(${0.35 + colorTransitionProgress * 0.65})`
+            } else {
+              ctx.filter = 'none'
+            }
           } else {
-            // Escala de grises tipo prensa
+            // Escala de grises profunda para el resto
             ctx.filter = `grayscale(100%) contrast(130%) brightness(${0.35 + opacity * 0.25})`
           }
 
           ctx.drawImage(img, -itemSize / 2, -itemSize / 2, itemSize, itemSize)
 
-          // Destello orgánico sutil interno sobre la imagen ganadora
-          if (isWinner && glowAlpha > 0) {
+          // Brillo fotográfico suave y orgánico sobre la ganadora
+          if (isWinner && colorTransitionProgress > 0) {
             ctx.save()
             ctx.globalCompositeOperation = 'soft-light'
-            ctx.fillStyle = `rgba(255, 255, 255, ${0.25 * glowAlpha})`
+            ctx.fillStyle = `rgba(255, 255, 255, ${0.2 * colorTransitionProgress})`
             ctx.fillRect(-itemSize / 2, -itemSize / 2, itemSize, itemSize)
             ctx.restore()
           }
@@ -177,23 +175,25 @@ export default function GeneradorCabeceraPunkPro() {
       })
     }
 
-    // 3. Franjas rosas por encima de todo
+    // 3. Franjas superiores e inferiores por encima de las imágenes
     drawTopOverlay(ctx, width, height)
 
-    // 4. Cartel de Título Editorial
+    // 4. Cartel de Título Editorial (Aparición smooth)
     if (textProgress > 0) {
       ctx.save()
-      ctx.globalAlpha = Math.min(1, textProgress * 2.2)
+      ctx.globalAlpha = Math.min(1, textProgress * 2.5)
 
+      const textScale = 0.95 + textProgress * 0.05
       ctx.translate(540, 1620)
+      ctx.scale(textScale, textScale)
 
-      ctx.fillStyle = '#0A0A0A'
+      ctx.fillStyle = '#FF2E93'
       ctx.fillRect(-450, -68, 900, 120)
 
-      ctx.fillStyle = '#FFFFFF'
+      ctx.fillStyle = '#0A0A0A'
       ctx.fillRect(-444, -62, 888, 108)
 
-      ctx.fillStyle = '#0A0A0A'
+      ctx.fillStyle = '#FFFFFF'
       ctx.font = '900 48px system-ui, -apple-system, sans-serif'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
@@ -219,7 +219,7 @@ export default function GeneradorCabeceraPunkPro() {
     const gap = 90
     const stride = itemSize + gap
 
-    // Parada exacta y natural en la vuelta 5
+    // Parada exacta en la vuelta 5
     const targetLoopRound = 5
     const targetGlobalIndex = targetLoopRound * images.length + winnerIdx
     const totalDistance = targetGlobalIndex * stride
@@ -229,9 +229,14 @@ export default function GeneradorCabeceraPunkPro() {
     let startTime: number | null = null
     const duration = 6500
 
-    // Curva física fluida de freno progresivo continuo
-    const smoothStopEasing = (t: number): number => {
-      return 1 - Math.pow(1 - t, 3.2)
+    // Curva física ultrarrápida pero extremadamente suave (Smoothstep de alta inercia)
+    const ultraSmoothEasing = (t: number): number => {
+      // Función polinómica cúbica/quár-tica integrada para arranque y frenado hiper-orgánicos
+      if (t < 0.5) {
+        return 4 * t * t * t
+      }
+      const f = t - 1
+      return 1 + 4 * f * f * f
     }
 
     const step = (timestamp: number) => {
@@ -239,14 +244,18 @@ export default function GeneradorCabeceraPunkPro() {
       const elapsed = timestamp - startTime
       const progress = Math.min(elapsed / duration, 1)
 
-      const easeProgress = smoothStopEasing(progress)
+      // Suavizado general de la curva de movimiento
+      const easeProgress = ultraSmoothEasing(progress)
       const currentOffsetY = totalDistance * easeProgress
 
-      const isFinished = progress >= 0.99
-      const glowAlpha = isFinished ? Math.min((elapsed - duration * 0.99) / 300, 1) : 0
-      const textProgress = progress >= 0.92 ? Math.min((elapsed - duration * 0.92) / 400, 1) : 0
+      const isFinished = progress >= 0.985
+      
+      // Progresos de transición graduales (Cero parpadeos)
+      const colorTransitionProgress = isFinished ? Math.min((elapsed - duration * 0.985) / 500, 1) : 0
+      const glowAlpha = isFinished ? Math.min((elapsed - duration * 0.985) / 450, 1) : 0
+      const textProgress = progress >= 0.9 ? Math.min((elapsed - duration * 0.9) / 500, 1) : 0
 
-      renderFrame(ctx, currentOffsetY, isFinished, winnerImg, textProgress, glowAlpha)
+      renderFrame(ctx, currentOffsetY, isFinished, winnerImg, textProgress, glowAlpha, colorTransitionProgress)
 
       if (elapsed < duration + 900) {
         requestAnimationFrame(step)
@@ -273,7 +282,7 @@ export default function GeneradorCabeceraPunkPro() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `reel-cabecera-punk-${Date.now()}.mp4`
+      a.download = `reel-cabecera-smooth-${Date.now()}.mp4`
       a.click()
       setIsRecording(false)
     }
@@ -343,7 +352,7 @@ export default function GeneradorCabeceraPunkPro() {
               <ArrowLeft className="size-4" /> Salir
             </Link>
             <span className="flex items-center gap-1 text-xs text-emerald-400 font-mono bg-emerald-950/50 px-2.5 py-1 rounded border border-emerald-800">
-              <ShieldCheck className="size-3.5" /> Editorial Pro
+              <ShieldCheck className="size-3.5" /> Ultra Smooth Pro
             </span>
           </div>
 
@@ -395,7 +404,7 @@ export default function GeneradorCabeceraPunkPro() {
                 disabled={isRecording}
                 className="w-full py-3.5 bg-zinc-800 hover:bg-zinc-700 font-bold uppercase rounded flex items-center justify-center gap-2 border border-white/10 text-zinc-200 transition-colors"
               >
-                <Play className="size-4 text-punk-yellow" /> Vista Previa (6.5s)
+                <Play className="size-4 text-punk-yellow" /> Vista Previa Ultra-Smooth (6.5s)
               </button>
 
               <button
