@@ -27,7 +27,7 @@ export default function GeneradorCabeceraPunkPro() {
     }
   }
 
-  // Carga de imágenes con recorte proporcional perfecto 1:1 (Sin deformar)
+  // Carga de imágenes con recorte proporcional estricto 1:1
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
     const files = Array.from(e.target.files)
@@ -65,33 +65,40 @@ export default function GeneradorCabeceraPunkPro() {
     })
   }
 
-  // Fondo Rosa Neón Orgánico con Viñeteado Cinematográfico
+  // Fondo y Resplandor Radial
   const drawBackground = (ctx: CanvasRenderingContext2D, width: number, height: number, glowAlpha: number) => {
-    // Fondo Rosa Neón Base (#FF2E93)
+    // Fondo Rosa Neón
     ctx.fillStyle = '#FF2E93'
     ctx.fillRect(0, 0, width, height)
 
-    // Viñeteado radial oscuro para dar foco al centro
+    // Viñeteado cinematográfico
     const vignette = ctx.createRadialGradient(width / 2, 860, 200, width / 2, 860, 1100)
-    vignette.addColorStop(0, 'rgba(0,0,0,0.15)')
+    vignette.addColorStop(0, 'rgba(0,0,0,0.12)')
     vignette.addColorStop(1, 'rgba(0,0,0,0.65)')
     ctx.fillStyle = vignette
     ctx.fillRect(0, 0, width, height)
 
-    // Destello de resplandor orgánico difuso cuando se revela el ganador
+    // Destello de iluminación suave al seleccionarse
     if (glowAlpha > 0) {
-      const organicGlow = ctx.createRadialGradient(width / 2, 860, 100, width / 2, 860, 750)
-      organicGlow.addColorStop(0, `rgba(255, 255, 255, ${0.28 * glowAlpha})`)
-      organicGlow.addColorStop(0.5, `rgba(255, 230, 240, ${0.12 * glowAlpha})`)
+      const organicGlow = ctx.createRadialGradient(width / 2, 860, 80, width / 2, 860, 700)
+      organicGlow.addColorStop(0, `rgba(255, 255, 255, ${0.35 * glowAlpha})`)
+      organicGlow.addColorStop(0.5, `rgba(255, 230, 245, ${0.15 * glowAlpha})`)
       organicGlow.addColorStop(1, 'rgba(0, 0, 0, 0)')
       ctx.fillStyle = organicGlow
       ctx.fillRect(0, 0, width, height)
     }
+  }
 
-    // Franjas negras superiores e inferiores
+  // Franjas de corte superior e inferior (capa superior overlay)
+  const drawTopOverlay = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    ctx.fillStyle = '#FF2E93'
+    ctx.fillRect(0, 0, width, 32)
+    ctx.fillRect(0, height - 32, width, 32)
+
+    // Línea de separación negra mate
     ctx.fillStyle = '#0A0A0A'
-    ctx.fillRect(0, 0, width, 28)
-    ctx.fillRect(0, height - 28, width, 28)
+    ctx.fillRect(0, 32, width, 4)
+    ctx.fillRect(0, height - 36, width, 4)
   }
 
   const renderFrame = (
@@ -105,6 +112,7 @@ export default function GeneradorCabeceraPunkPro() {
     const width = 1080
     const height = 1920
 
+    // 1. Dibujar Fondo
     drawBackground(ctx, width, height, glowAlpha)
 
     const itemSize = 640
@@ -112,6 +120,7 @@ export default function GeneradorCabeceraPunkPro() {
     const centerY = 860
     const stride = itemSize + gap
 
+    // 2. Renderizado de las Portadas
     if (images.length > 0) {
       const totalLoopImages: HTMLImageElement[] = []
       for (let r = 0; r < 10; r++) {
@@ -134,35 +143,50 @@ export default function GeneradorCabeceraPunkPro() {
           const isWinner = img === winnerImg && showWinner
 
           if (isWinner) {
-            // Sombra difusa orgánica posterior
-            ctx.shadowColor = `rgba(0, 0, 0, ${0.6 * glowAlpha})`
-            ctx.shadowBlur = 60
+            // Sombra sutil de la portada ganadora
+            ctx.shadowColor = `rgba(0, 0, 0, ${0.5 * glowAlpha})`
+            ctx.shadowBlur = 50
 
-            // Marco sólido gráfico de imprenta
+            // Marco de imprenta
             ctx.fillStyle = '#0A0A0A'
             ctx.fillRect(-itemSize / 2 - 12, -itemSize / 2 - 12, itemSize + 24, itemSize + 24)
 
             ctx.fillStyle = '#FFFFFF'
             ctx.fillRect(-itemSize / 2 - 4, -itemSize / 2 - 4, itemSize + 8, itemSize + 8)
+
+            // Filtro de brillo sutil en la imagen ganadora
+            ctx.filter = `brightness(${1.0 + 0.15 * glowAlpha}) contrast(${1.0 + 0.08 * glowAlpha})`
           } else {
-            // Escala de grises contrastada para las portadas secundarias
+            // Escala de grises tipo prensa
             ctx.filter = `grayscale(100%) contrast(130%) brightness(${0.35 + opacity * 0.25})`
           }
 
           ctx.drawImage(img, -itemSize / 2, -itemSize / 2, itemSize, itemSize)
+
+          // Destello orgánico sutil interno sobre la imagen ganadora
+          if (isWinner && glowAlpha > 0) {
+            ctx.save()
+            ctx.globalCompositeOperation = 'soft-light'
+            ctx.fillStyle = `rgba(255, 255, 255, ${0.25 * glowAlpha})`
+            ctx.fillRect(-itemSize / 2, -itemSize / 2, itemSize, itemSize)
+            ctx.restore()
+          }
+
           ctx.restore()
         }
       })
     }
 
-    // Título Editorial
+    // 3. Franjas rosas por encima de todo
+    drawTopOverlay(ctx, width, height)
+
+    // 4. Cartel de Título Editorial
     if (textProgress > 0) {
       ctx.save()
       ctx.globalAlpha = Math.min(1, textProgress * 2.2)
 
       ctx.translate(540, 1620)
 
-      // Caja tipográfica de contraste
       ctx.fillStyle = '#0A0A0A'
       ctx.fillRect(-450, -68, 900, 120)
 
@@ -195,7 +219,7 @@ export default function GeneradorCabeceraPunkPro() {
     const gap = 90
     const stride = itemSize + gap
 
-    // Parada exacta en el disco ganador tras 5 rondas
+    // Parada exacta y natural en la vuelta 5
     const targetLoopRound = 5
     const targetGlobalIndex = targetLoopRound * images.length + winnerIdx
     const totalDistance = targetGlobalIndex * stride
@@ -205,15 +229,9 @@ export default function GeneradorCabeceraPunkPro() {
     let startTime: number | null = null
     const duration = 6500
 
-    // Curva física de inercia orgánica (Aceleración y desaceleración natural)
-    const organicEasing = (t: number): number => {
-      if (t < 0.18) return 2.0 * t * t
-      if (t < 0.86) {
-        const subT = (t - 0.18) / 0.68
-        return 0.065 + 0.855 * (1 - Math.pow(1 - subT, 3))
-      }
-      const subT = (t - 0.86) / 0.14
-      return 0.92 + subT * 0.08
+    // Curva física fluida de freno progresivo continuo
+    const smoothStopEasing = (t: number): number => {
+      return 1 - Math.pow(1 - t, 3.2)
     }
 
     const step = (timestamp: number) => {
@@ -221,11 +239,11 @@ export default function GeneradorCabeceraPunkPro() {
       const elapsed = timestamp - startTime
       const progress = Math.min(elapsed / duration, 1)
 
-      const easeProgress = organicEasing(progress)
+      const easeProgress = smoothStopEasing(progress)
       const currentOffsetY = totalDistance * easeProgress
 
-      const isFinished = progress >= 0.985
-      const glowAlpha = isFinished ? Math.min((elapsed - duration * 0.985) / 350, 1) : 0
+      const isFinished = progress >= 0.99
+      const glowAlpha = isFinished ? Math.min((elapsed - duration * 0.99) / 300, 1) : 0
       const textProgress = progress >= 0.92 ? Math.min((elapsed - duration * 0.92) / 400, 1) : 0
 
       renderFrame(ctx, currentOffsetY, isFinished, winnerImg, textProgress, glowAlpha)
@@ -272,6 +290,7 @@ export default function GeneradorCabeceraPunkPro() {
       const ctx = canvas.getContext('2d')
       if (ctx) {
         drawBackground(ctx, 1080, 1920, 0)
+        drawTopOverlay(ctx, 1080, 1920)
       }
     }
   }, [isAuthenticated])
@@ -350,4 +369,57 @@ export default function GeneradorCabeceraPunkPro() {
             <div>
               <label className="block mb-2 text-zinc-300">2. Portada Ganadora (Nº Orden):</label>
               <input
-                type
+                type="number"
+                min={1}
+                max={Math.max(1, images.length)}
+                value={winnerIndex}
+                onChange={(e) => setWinnerIndex(Number(e.target.value))}
+                className="w-full bg-zinc-800 border border-zinc-700 p-3 rounded text-white text-lg font-bold"
+              />
+            </div>
+
+            <div>
+              <label className="block mb-2 text-zinc-300">3. Título del Álbum / Artista:</label>
+              <input
+                type="text"
+                value={albumTitle}
+                onChange={(e) => setAlbumTitle(e.target.value)}
+                placeholder="EJ: SAMURAÏ — AMARRE"
+                className="w-full bg-zinc-800 border border-zinc-700 p-3 rounded text-white text-base font-bold uppercase tracking-wider"
+              />
+            </div>
+
+            <div className="pt-4 flex flex-col gap-3">
+              <button
+                onClick={() => runAnimation()}
+                disabled={isRecording}
+                className="w-full py-3.5 bg-zinc-800 hover:bg-zinc-700 font-bold uppercase rounded flex items-center justify-center gap-2 border border-white/10 text-zinc-200 transition-colors"
+              >
+                <Play className="size-4 text-punk-yellow" /> Vista Previa (6.5s)
+              </button>
+
+              <button
+                onClick={handleRecordVideo}
+                disabled={isRecording}
+                className="w-full py-4 bg-punk-pink hover:bg-pink-600 font-bold uppercase rounded text-white flex items-center justify-center gap-2 shadow-xl text-base tracking-wide transition-all"
+              >
+                <Video className="size-5" />
+                {isRecording ? 'Renderizando MP4...' : 'Exportar Vídeo (.mp4)'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Lienzo Canvas 9:16 HD */}
+        <div className="lg:col-span-7 flex items-center justify-center bg-zinc-950 p-6 rounded-xl border border-white/10">
+          <canvas
+            ref={canvasRef}
+            width={1080}
+            height={1920}
+            className="h-[75vh] aspect-[9/16] rounded-lg shadow-2xl border border-white/10 object-contain"
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
