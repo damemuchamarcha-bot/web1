@@ -273,18 +273,24 @@ export default function GeneradorCabeceraPunkPro() {
     setIsRecording(true)
     const stream = canvas.captureStream(60)
 
-    // Opciones de exportación compatibles
-    let options: MediaRecorderOptions = { mimeType: 'video/webm;codecs=vp9' }
-    if (!MediaRecorder.isTypeSupported(options.mimeType!)) {
-      if (MediaRecorder.isTypeSupported('video/webm')) {
-        options = { mimeType: 'video/webm' }
-      } else if (MediaRecorder.isTypeSupported('video/mp4')) {
-        options = { mimeType: 'video/mp4' }
-      } else {
-        options = {}
+    // Selección de códec priorizando MP4 H.264
+    const mimeTypesToTry = [
+      'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+      'video/mp4;codecs=avc1',
+      'video/mp4',
+      'video/webm;codecs=vp9',
+      'video/webm'
+    ]
+
+    let selectedMimeType = ''
+    for (const mime of mimeTypesToTry) {
+      if (MediaRecorder.isTypeSupported(mime)) {
+        selectedMimeType = mime
+        break
       }
     }
 
+    const options: MediaRecorderOptions = selectedMimeType ? { mimeType: selectedMimeType } : {}
     const recorder = new MediaRecorder(stream, options)
     const chunks: Blob[] = []
 
@@ -295,25 +301,23 @@ export default function GeneradorCabeceraPunkPro() {
     }
 
     recorder.onstop = () => {
-      const mimeType = options.mimeType || 'video/webm'
-      const ext = mimeType.includes('mp4') ? 'mp4' : 'webm'
-      const blob = new Blob(chunks, { type: mimeType })
+      const blob = new Blob(chunks, { type: selectedMimeType || 'video/mp4' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `reel-cabecera-${Date.now()}.${ext}`
+      a.download = `reel-cabecera-${Date.now()}.mp4`
       a.click()
       URL.revokeObjectURL(url)
       setIsRecording(false)
     }
 
-    // Iniciar grabación con capturas de flujo constantes cada 100ms
+    // Iniciar grabación volcando fragmentos constantemente
     recorder.start(100)
 
-    // Ejecutar la animación
+    // Ejecutar animación completa
     await runAnimation()
 
-    // Búfer adicional de 1.2s para asegurar que el fotograma final se mantiene grabado entero
+    // Búfer adicional de 1.2s para retener el plano final
     setTimeout(() => {
       if (recorder.state !== 'inactive') {
         recorder.stop()
