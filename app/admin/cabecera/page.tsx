@@ -27,21 +27,22 @@ export default function GeneradorCabeceraPunkPro() {
     }
   }
 
-  // Carga de imágenes con recorte proporcional estricto 1:1
+  // Carga de imágenes con recorte proporcional estricto 1:1 y limpieza segura
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
     const files = Array.from(e.target.files)
     const loaded: HTMLImageElement[] = []
 
     files.forEach((file) => {
+      const objectUrl = URL.createObjectURL(file)
       const img = new Image()
-      img.src = URL.createObjectURL(file)
+      img.src = objectUrl
       img.onload = () => {
         const squareCanvas = document.createElement('canvas')
         const targetSize = 800
         squareCanvas.width = targetSize
         squareCanvas.height = targetSize
-        const sCtx = squareCanvas.getContext('2d')
+        const sCtx = squareCanvas.getContext('2d', { alpha: false })
 
         if (sCtx) {
           const minDim = Math.min(img.width, img.height)
@@ -56,6 +57,7 @@ export default function GeneradorCabeceraPunkPro() {
           squareImg.src = squareCanvas.toDataURL('image/jpeg', 0.98)
           squareImg.onload = () => {
             loaded.push(squareImg)
+            URL.revokeObjectURL(objectUrl)
             if (loaded.length === files.length) {
               setImages(loaded)
             }
@@ -67,11 +69,9 @@ export default function GeneradorCabeceraPunkPro() {
 
   // Fondo Negro Mate con Profundidad y Resplandor Radial Tenue
   const drawBackground = (ctx: CanvasRenderingContext2D, width: number, height: number, glowAlpha: number) => {
-    // Negro profundo mate
     ctx.fillStyle = '#0A0A0A'
     ctx.fillRect(0, 0, width, height)
 
-    // Resplandor radial central sutil para dar profundidad al ganar
     if (glowAlpha > 0) {
       const radial = ctx.createRadialGradient(width / 2, 860, 50, width / 2, 860, 850)
       radial.addColorStop(0, `rgba(255, 46, 147, ${0.18 * glowAlpha})`)
@@ -88,7 +88,6 @@ export default function GeneradorCabeceraPunkPro() {
     ctx.fillRect(0, 0, width, 32)
     ctx.fillRect(0, height - 32, width, 32)
 
-    // Líneas de acento sutiles
     ctx.fillStyle = '#FF2E93'
     ctx.fillRect(0, 32, width, 3)
     ctx.fillRect(0, height - 35, width, 3)
@@ -106,7 +105,6 @@ export default function GeneradorCabeceraPunkPro() {
     const width = 1080
     const height = 1920
 
-    // 1. Dibujar Fondo
     drawBackground(ctx, width, height, glowAlpha)
 
     const itemSize = 640
@@ -114,10 +112,9 @@ export default function GeneradorCabeceraPunkPro() {
     const centerY = 860
     const stride = itemSize + gap
 
-    // 2. Renderizado de las Portadas
     if (images.length > 0) {
       const totalLoopImages: HTMLImageElement[] = []
-      for (let r = 0; r < 10; r++) {
+      for (let r = 0; r < 12; r++) {
         totalLoopImages.push(...images)
       }
 
@@ -137,31 +134,26 @@ export default function GeneradorCabeceraPunkPro() {
           const isWinner = img === winnerImg && showWinner
 
           if (isWinner) {
-            // Sombra suave en la portada ganadora
             ctx.shadowColor = `rgba(0, 0, 0, ${0.6 * glowAlpha})`
             ctx.shadowBlur = 40
 
-            // Marco de imprenta elegante
             ctx.fillStyle = '#FF2E93'
             ctx.fillRect(-itemSize / 2 - 10, -itemSize / 2 - 10, itemSize + 20, itemSize + 20)
 
             ctx.fillStyle = '#0A0A0A'
             ctx.fillRect(-itemSize / 2 - 3, -itemSize / 2 - 3, itemSize + 6, itemSize + 6)
 
-            // Transición suave de escala de grises a color real (Sin parpadeo brusco)
             if (colorTransitionProgress < 1) {
               ctx.filter = `grayscale(${1 - colorTransitionProgress}) brightness(${0.35 + colorTransitionProgress * 0.65})`
             } else {
               ctx.filter = 'none'
             }
           } else {
-            // Escala de grises profunda para el resto
             ctx.filter = `grayscale(100%) contrast(130%) brightness(${0.35 + opacity * 0.25})`
           }
 
           ctx.drawImage(img, -itemSize / 2, -itemSize / 2, itemSize, itemSize)
 
-          // Brillo fotográfico suave y orgánico sobre la ganadora
           if (isWinner && colorTransitionProgress > 0) {
             ctx.save()
             ctx.globalCompositeOperation = 'soft-light'
@@ -175,10 +167,8 @@ export default function GeneradorCabeceraPunkPro() {
       })
     }
 
-    // 3. Franjas superiores e inferiores por encima de las imágenes
     drawTopOverlay(ctx, width, height)
 
-    // 4. Cartel de Título Editorial (Aparición smooth)
     if (textProgress > 0) {
       ctx.save()
       ctx.globalAlpha = Math.min(1, textProgress * 2.5)
@@ -203,100 +193,138 @@ export default function GeneradorCabeceraPunkPro() {
     }
   }
 
-  const runAnimation = (onComplete?: () => void) => {
+  const runAnimation = (): Promise<void> => {
+    return new Promise((resolve) => {
+      const canvas = canvasRef.current
+      if (!canvas) {
+        resolve()
+        return
+      }
+      const ctx = canvas.getContext('2d', { alpha: false })
+      if (!ctx) {
+        resolve()
+        return
+      }
+
+      if (images.length === 0) {
+        alert('Sube al menos 3 portadas.')
+        resolve()
+        return
+      }
+
+      const winnerIdx = Math.max(0, winnerIndex - 1) % images.length
+      const itemSize = 640
+      const gap = 90
+      const stride = itemSize + gap
+
+      const targetLoopRound = 5
+      const targetGlobalIndex = targetLoopRound * images.length + winnerIdx
+      const totalDistance = targetGlobalIndex * stride
+
+      const winnerImg = images[winnerIdx]
+
+      let startTime: number | null = null
+      const duration = 6500
+
+      const ultraSmoothEasing = (t: number): number => {
+        if (t < 0.5) {
+          return 4 * t * t * t
+        }
+        const f = t - 1
+        return 1 + 4 * f * f * f
+      }
+
+      const step = (timestamp: number) => {
+        if (!startTime) startTime = timestamp
+        const elapsed = timestamp - startTime
+        const progress = Math.min(elapsed / duration, 1)
+
+        const easeProgress = ultraSmoothEasing(progress)
+        const currentOffsetY = totalDistance * easeProgress
+
+        const isFinished = progress >= 0.985
+        const colorTransitionProgress = isFinished ? Math.min((elapsed - duration * 0.985) / 500, 1) : 0
+        const glowAlpha = isFinished ? Math.min((elapsed - duration * 0.985) / 450, 1) : 0
+        const textProgress = progress >= 0.9 ? Math.min((elapsed - duration * 0.9) / 500, 1) : 0
+
+        renderFrame(ctx, currentOffsetY, isFinished, winnerImg, textProgress, glowAlpha, colorTransitionProgress)
+
+        // Mantenemos renderizando hasta completar totalmente la animación y la transición final de color
+        if (elapsed < duration + 1000) {
+          requestAnimationFrame(step)
+        } else {
+          resolve()
+        }
+      }
+
+      requestAnimationFrame(step)
+    })
+  }
+
+  const handleRecordVideo = async () => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
 
     if (images.length === 0) {
       alert('Sube al menos 3 portadas.')
       return
     }
 
-    const winnerIdx = Math.max(0, winnerIndex - 1) % images.length
-    const itemSize = 640
-    const gap = 90
-    const stride = itemSize + gap
-
-    // Parada exacta en la vuelta 5
-    const targetLoopRound = 5
-    const targetGlobalIndex = targetLoopRound * images.length + winnerIdx
-    const totalDistance = targetGlobalIndex * stride
-
-    const winnerImg = images[winnerIdx]
-
-    let startTime: number | null = null
-    const duration = 6500
-
-    // Curva física ultrarrápida pero extremadamente suave (Smoothstep de alta inercia)
-    const ultraSmoothEasing = (t: number): number => {
-      // Función polinómica cúbica/quár-tica integrada para arranque y frenado hiper-orgánicos
-      if (t < 0.5) {
-        return 4 * t * t * t
-      }
-      const f = t - 1
-      return 1 + 4 * f * f * f
-    }
-
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp
-      const elapsed = timestamp - startTime
-      const progress = Math.min(elapsed / duration, 1)
-
-      // Suavizado general de la curva de movimiento
-      const easeProgress = ultraSmoothEasing(progress)
-      const currentOffsetY = totalDistance * easeProgress
-
-      const isFinished = progress >= 0.985
-      
-      // Progresos de transición graduales (Cero parpadeos)
-      const colorTransitionProgress = isFinished ? Math.min((elapsed - duration * 0.985) / 500, 1) : 0
-      const glowAlpha = isFinished ? Math.min((elapsed - duration * 0.985) / 450, 1) : 0
-      const textProgress = progress >= 0.9 ? Math.min((elapsed - duration * 0.9) / 500, 1) : 0
-
-      renderFrame(ctx, currentOffsetY, isFinished, winnerImg, textProgress, glowAlpha, colorTransitionProgress)
-
-      if (elapsed < duration + 900) {
-        requestAnimationFrame(step)
-      } else if (onComplete) {
-        onComplete()
-      }
-    }
-
-    requestAnimationFrame(step)
-  }
-
-  const handleRecordVideo = () => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
     setIsRecording(true)
     const stream = canvas.captureStream(60)
-    const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' })
+
+    // Opciones de exportación compatibles
+    let options: MediaRecorderOptions = { mimeType: 'video/webm;codecs=vp9' }
+    if (!MediaRecorder.isTypeSupported(options.mimeType!)) {
+      if (MediaRecorder.isTypeSupported('video/webm')) {
+        options = { mimeType: 'video/webm' }
+      } else if (MediaRecorder.isTypeSupported('video/mp4')) {
+        options = { mimeType: 'video/mp4' }
+      } else {
+        options = {}
+      }
+    }
+
+    const recorder = new MediaRecorder(stream, options)
     const chunks: Blob[] = []
 
-    recorder.ondataavailable = (e) => chunks.push(e.data)
+    recorder.ondataavailable = (e) => {
+      if (e.data && e.data.size > 0) {
+        chunks.push(e.data)
+      }
+    }
+
     recorder.onstop = () => {
-      const blob = new Blob(chunks, { type: 'video/mp4' })
+      const mimeType = options.mimeType || 'video/webm'
+      const ext = mimeType.includes('mp4') ? 'mp4' : 'webm'
+      const blob = new Blob(chunks, { type: mimeType })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `reel-cabecera-smooth-${Date.now()}.mp4`
+      a.download = `reel-cabecera-${Date.now()}.${ext}`
       a.click()
+      URL.revokeObjectURL(url)
       setIsRecording(false)
     }
 
-    recorder.start()
-    runAnimation(() => {
-      setTimeout(() => recorder.stop(), 450)
-    })
+    // Iniciar grabación con capturas de flujo constantes cada 100ms
+    recorder.start(100)
+
+    // Ejecutar la animación
+    await runAnimation()
+
+    // Búfer adicional de 1.2s para asegurar que el fotograma final se mantiene grabado entero
+    setTimeout(() => {
+      if (recorder.state !== 'inactive') {
+        recorder.stop()
+      }
+    }, 1200)
   }
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (canvas && isAuthenticated) {
-      const ctx = canvas.getContext('2d')
+      const ctx = canvas.getContext('2d', { alpha: false })
       if (ctx) {
         drawBackground(ctx, 1080, 1920, 0)
         drawTopOverlay(ctx, 1080, 1920)
@@ -404,31 +432,10 @@ export default function GeneradorCabeceraPunkPro() {
                 disabled={isRecording}
                 className="w-full py-3.5 bg-zinc-800 hover:bg-zinc-700 font-bold uppercase rounded flex items-center justify-center gap-2 border border-white/10 text-zinc-200 transition-colors"
               >
-                <Play className="size-4 text-punk-yellow" /> Vista Previa Ultra-Smooth (6.5s)
+                <Play className="size-4 text-punk-yellow" /> Vista Previa (6.5s)
               </button>
 
               <button
                 onClick={handleRecordVideo}
                 disabled={isRecording}
-                className="w-full py-4 bg-punk-pink hover:bg-pink-600 font-bold uppercase rounded text-white flex items-center justify-center gap-2 shadow-xl text-base tracking-wide transition-all"
-              >
-                <Video className="size-5" />
-                {isRecording ? 'Renderizando MP4...' : 'Exportar Vídeo (.mp4)'}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Lienzo Canvas 9:16 HD */}
-        <div className="lg:col-span-7 flex items-center justify-center bg-zinc-950 p-6 rounded-xl border border-white/10">
-          <canvas
-            ref={canvasRef}
-            width={1080}
-            height={1920}
-            className="h-[75vh] aspect-[9/16] rounded-lg shadow-2xl border border-white/10 object-contain"
-          />
-        </div>
-      </div>
-    </div>
-  )
-}
+                className="w-full py-4 bg-punk-pink hover:bg-pink-600 font-bold uppercase rounded text-white flex items-center justify-center gap-2 shadow-
