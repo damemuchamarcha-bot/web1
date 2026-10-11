@@ -438,4 +438,25 @@ export default function GeneradorCabeceraPunkPro() {
               <button
                 onClick={handleRecordVideo}
                 disabled={isRecording}
-                className="w-full py-4 bg-punk-pink hover:bg-pink-600 font-bold uppercase rounded text-white flex items-center justify-center gap-2 shadow-
+                className="w-full py-4 bg-punk-pink hover:bg-pink-600 font-bold uppercase rounded text-white flex items-center justify-center gap-2 shadow-xl text-base tracking-wide transition-all"
+              >
+                <Video className="size-5" />
+                {isRecording ? 'Exportando Vídeo Completo...' : 'Exportar Vídeo HD (.mp4)'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Lienzo Canvas 9:16 HD */}
+        <div className="lg:col-span-7 flex items-center justify-center bg-zinc-950 p-6 rounded-xl border border-white/10">
+          <canvas
+            ref={canvasRef}
+            width={1080}
+            height={1920}
+            className="h-[75vh] aspect-[9/16] rounded-lg shadow-2xl border border-white/10 object-contain"
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
