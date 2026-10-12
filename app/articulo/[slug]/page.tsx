@@ -23,14 +23,19 @@ export async function generateMetadata({
   const article = getArticle(slug)
   if (!article) return { title: 'Artículo no encontrado — Dame Marcha' }
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://damemarcha.com'
+  // Forzamos el uso de las 'www' para evitar errores de redirección en Search Console
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.damemarcha.com'
+
+  // Usamos la meta_description de Decap si existe; si no, recurrimos al excerpt
+  const metaDescription = article.meta_description || article.excerpt
 
   return {
     title: `${article.title} — Dame Marcha`,
-    description: article.excerpt,
+    description: metaDescription,
+    keywords: article.keywords, // Opcional: si las escribes en Decap CMS
     openGraph: {
       title: article.title,
-      description: article.excerpt,
+      description: metaDescription,
       url: `${baseUrl}/articulo/${article.slug}`,
       siteName: 'Dame Marcha',
       images: [
@@ -47,7 +52,7 @@ export async function generateMetadata({
     twitter: {
       card: 'summary_large_image',
       title: article.title,
-      description: article.excerpt,
+      description: metaDescription,
       images: [article.image],
     },
   }
@@ -179,12 +184,12 @@ export default async function ArticlePage({
 
   const related = getRecent(article.slug).slice(0, 3)
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://damemarcha.com'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.damemarcha.com'
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
     headline: article.title,
-    description: article.excerpt,
+    description: article.meta_description || article.excerpt,
     image: [article.image?.startsWith('http') ? article.image : `${baseUrl}${article.image}`],
     datePublished: article.date,
     author: [
@@ -433,5 +438,4 @@ export default async function ArticlePage({
       </section>
     </article>
   )
-} 
- 
+}
