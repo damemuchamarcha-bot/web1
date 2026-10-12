@@ -3,6 +3,9 @@ title: "La bola negra: un universo inspirado en Lorca"
 date: 2026-10-10T21:19:00.000+02:00
 excerpt: La película dirigida por Los Javis fue estrenada el pasado 25 de
   septiembre y se postula como la mejor del año
+meta_description: "xploramos 'La Bola Negra' de Los Javis: el universo estético,
+  la sombra de Lorca y la herencia poética llevada al terreno más oscuro."
+keywords: La Bola Negra, Los Javis, Lorca,Guitarricadelafuente
 author: Aroha Moreno
 section: cine
 category: analisis-de-cine
