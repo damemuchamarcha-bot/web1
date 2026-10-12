@@ -3,6 +3,9 @@ title: "Entre vaqueros y brujas: Fábula"
 date: 2026-10-02T18:41:00.000+02:00
 excerpt: Así es como se escucha el adelanto de la nueva era de la cantante
   madrileña Samuraï. Análisis y significado de la canción "Fábula".
+meta_description: Descubre el análisis de 'La Fábula' de Samuraï. Desgranamos la
+  letra, el sonido y el concepto visual entre vaqueros y brujas en Dame Marcha.
+keywords: Samuraï, La Fábula, letra, análisis
 author: Marta Menjíbar
 section: musica
 category: analisis-de-albumes
