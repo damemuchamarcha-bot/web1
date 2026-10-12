@@ -1,8 +1,8 @@
 ---
 title: 'La mirada al interior de Q Marsden: "DO YOU SEE ME?"'
 date: 2026-10-09T18:53:00.000+02:00
-excerpt: "DO YOU SEE ME? es el nuevo lanzamiento de Q Marsden un álbum lleno de
-  reflexión. "
+excerpt: DO YOU SEE ME? es el nuevo lanzamiento de Q Marsden un álbum lleno de
+  reflexión. Análisis y reseña del álbum del artista.
 author: " Marta Menjíbar"
 section: musica
 category: analisis-de-albumes
