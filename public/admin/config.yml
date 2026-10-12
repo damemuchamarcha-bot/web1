@@ -12,7 +12,7 @@ media_library:
   name: uploadcare
   config:
     publicKey: "0c8ace87549de321b182"
-    useFullUrl: true    # <--- ESTO ES LO CLAVE: obliga a guardar "https://ucarecdn.com/..."
+    useFullUrl: true    # <--- OBLIGA A GUARDAR LA URL COMPLETA
     tabs: "file url camera gdrive"
     effects: "crop,rotate"
     settings:
@@ -42,6 +42,22 @@ collections:
       - label: "Resumen (Excerpt)"
         name: "excerpt"
         widget: "text"
+
+      # ----------------------------------------------------
+      # 🚀 CAMPOS SEO OPCIONALES (INVISIBLES EN LA WEB)
+      # ----------------------------------------------------
+      - label: "SEO - Meta Description"
+        name: "meta_description"
+        widget: "text"
+        required: false
+        hint: "Opcional. Escribe entre 130 y 155 caracteres para Google."
+
+      - label: "SEO - Palabras Clave (Keywords)"
+        name: "keywords"
+        widget: "string"
+        required: false
+        hint: "Opcional. Separadas por comas. Ej: artista, disco, análisis"
+      # ----------------------------------------------------
 
       - label: "Autor"
         name: "author"
