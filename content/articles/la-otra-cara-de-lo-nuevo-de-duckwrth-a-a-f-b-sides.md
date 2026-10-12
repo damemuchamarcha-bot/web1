@@ -4,6 +4,7 @@ date: 2026-10-01T20:24:00.000+02:00
 excerpt: El nuevo lanzamiento de Duckwrth
 meta_description: Analizamos 'A.A.F. B-Sides' de Duckwrth. La cara B más
   descarada del artista. Lee la crítica completa en Dame Marcha.
+keywords: Duckwrth, A.A.F. B-Sides, crítica, analizamos
 author: Marta Menjíbar
 section: musica
 category: analisis-de-albumes
