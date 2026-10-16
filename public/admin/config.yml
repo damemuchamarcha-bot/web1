@@ -22,7 +22,9 @@ media_folder: "public/uploads"
 public_folder: "/uploads"
 
 slug:
+  encoding: "ascii"
   clean_accents: true
+  sanitize_replacement: "-"
 
 collections:
   - name: "articles"
