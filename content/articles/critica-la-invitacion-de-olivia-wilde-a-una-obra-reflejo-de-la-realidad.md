@@ -26,15 +26,13 @@ La **incomodidad de Angela y Joe** se ve reflejada de distintas formas. Ella bus
 
 A medida que va avanzando la película, se puede ver la **profundidad del guion** y cómo lo que en un principio resultaba **cómico** acaba siendo una gran expresión de **tristeza**.
 
-## **Aspectos técnicos**
+## Aspectos técnicos
 
 A nivel técnico, resulta bastante **interesante y bien estructurada**. Cuenta con un **buen guion** y **buena dirección de fotografía**, que acompaña perfectamente al diálogo, apagándose junto a los personajes.
 
-
-
 ![Edward Norton, Penélope Cruz, Olivia Wilde y Seth Rogen en " La Invitación"](https://3ejmd55n1g.ucarecd.net/62aad1b4-3407-4aa1-968b-02da3e674d33/-/crop/2560x1095/0,209/-/preview/ "Edward Norton, Penélope Cruz, Olivia Wilde y Seth Rogen en \" La Invitación\"")
 
-## **Opinión personal**
+## Opinión personal
 
 En mi opinión, la película carece de una **conexión estable entre espectador y trama**. Los elementos están bien compuestos, pero **no es fácil de digerir** y no se llega a generar **empatía real ni atracción por las problemáticas** que trata, a pesar de ser bastante próximas a la realidad.
 
