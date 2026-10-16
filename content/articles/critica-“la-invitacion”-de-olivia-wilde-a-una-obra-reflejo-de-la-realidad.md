@@ -3,6 +3,11 @@ title: "Crítica: “La invitación” de Olivia Wilde a una obra reflejo de la 
 date: 2026-10-16T20:29:00.000+02:00
 excerpt: " La dinámica que presenta la directora resulta compleja, interesante y
   visualmente atractiva."
+meta_description: Análisis y crítica de La invitación, con Olivia Wilde, Seth
+  Rogen y Penélope Cruz. Opinión sobre su guion, fotografía y personajes.
+keywords: La invitación, crítica cinematográfica, análisis de películas,
+  Penélope Cruz, Olivia Wilde, Seth Rogen, Edward Norton, crítica de cine,
+  guion, fotografía cinematográfica, opinión de películas
 author: Aroha Moreno
 section: cine
 category: critica-de-cine
