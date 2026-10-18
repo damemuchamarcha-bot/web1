@@ -36,19 +36,13 @@ export function MascotaOveja() {
         </div>
       )}
 
-      {/* Botón con la Oveja Animada mediante CSS Pixel-Art */}
+      {/* Botón con la Oveja Animada utilizando tus clases de calibración */}
       <button
         onClick={manejarClic}
-        className="pointer-events-auto relative size-12 cursor-pointer focus:outline-none transition-transform hover:scale-125 active:scale-95"
+        className="pointer-events-auto relative cursor-pointer focus:outline-none transition-transform hover:scale-110 active:scale-95 bg-punk-black border-2 border-punk-pink/40 p-2 shadow-[3px_3px_0px_0px_rgba(255,0,128,1)] hover:border-punk-pink"
         title="¡Hazme clic!"
       >
-        <div 
-          className="size-full bg-no-repeat animate-oveja-caminar"
-          style={{
-            backgroundImage: "url('/oveja-caminando.png')",
-            imageRendering: 'pixelated', // Mantiene el Pixel-Art nítido sin verse borroso
-          }}
-        />
+        <div className="animate-oveja-caminar" />
       </button>
     </aside>
   )
