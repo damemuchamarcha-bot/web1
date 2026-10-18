@@ -4,12 +4,9 @@ import { useState } from 'react'
 import { X } from 'lucide-react'
 
 const FRASES_PUNK = [
-  "¡BEE-EE! Ese disco de Samuraï estuvo duro.",
+  "¡BEE-EE!",
   "¿Otra vez haciendo clic? Ponte a leer el artículo.",
   "Dame Marcha o dame lana.",
-  "100% Neopunk aprobada.",
-  "Menos algoritmos y más fanzines.",
-  "Escucha a Q Marsden o te doy un cabezazo.",
   "No duermas contando ovejas, lee críticas de cine.",
 ]
 
