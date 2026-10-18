@@ -21,6 +21,30 @@ function parseBoolean(value: unknown): boolean {
   return false
 }
 
+// ⏱️ Cálculo automático del tiempo de lectura basado en palabras reales (aprox. 200 palabras por minuto)
+function calculateReadingTime(content: string): string {
+  if (!content) return '1 min de lectura'
+  const words = content.trim().split(/\s+/).length
+  const minutes = Math.ceil(words / 200)
+  return `${minutes} min de lectura`
+}
+
+// ⏳ Cálculo automático de cuánto tiempo ha pasado desde la publicación
+function calculateTimeAgo(dateString: string): string {
+  if (!dateString) return 'Hace un tiempo'
+  const postDate = new Date(dateString)
+  const now = new Date()
+  const diffTime = Math.abs(now.getTime() - postDate.getTime())
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+
+  if (diffDays === 0) return 'Hoy'
+  if (diffDays === 1) return 'Ayer'
+  if (diffDays < 7) return `Hace ${diffDays} días`
+  if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semanas`
+  if (diffDays < 365) return `Hace ${Math.floor(diffDays / 30)} meses`
+  return `Hace ${Math.floor(diffDays / 365)} años`
+}
+
 // Subcategorías válidas
 export type CategorySlug =
   | 'analisis-de-cine'
@@ -53,6 +77,8 @@ export interface Article {
   slug: string
   title: string
   excerpt: string
+  meta_description?: string
+  keywords?: string
   section: SectionSlug | string
   category: CategorySlug | string
   categoryLabel: string
@@ -165,6 +191,8 @@ export function getAllArticles(): Article[] {
         slug,
         title: data.title,
         excerpt: data.excerpt || '',
+        meta_description: data.meta_description || undefined,
+        keywords: data.keywords || undefined,
         section,
         category,
         categoryLabel: data.categoryLabel || CATEGORY_LABELS[category] || 'Artículo',
@@ -173,8 +201,8 @@ export function getAllArticles(): Article[] {
         date: data.date
           ? new Date(data.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()
           : '21 SEPT 2026',
-        timeAgo: data.timeAgo || 'Reciente',
-        readingTime: data.readingTime || '5 min de lectura',
+        timeAgo: calculateTimeAgo(data.date),         // ⏳ Ahora calculado dinámicamente según la fecha real
+        readingTime: calculateReadingTime(content),   // ⏱️ Ahora calculado según la longitud real del texto
         image: rawImage,
         featured: parseBoolean(data.featured),
         spotify: rawSpotify || undefined,
