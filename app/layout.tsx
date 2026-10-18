@@ -5,6 +5,7 @@ import { Anton, Inter } from 'next/font/google'
 import Script from 'next/script'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
+import { MascotaOveja } from '@/components/mascota'
 import { articles } from '@/lib/articles'
 import './globals.css'
 
@@ -22,7 +23,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://damemarcha.com'),
+  metadataBase: new URL('https://www.damemarcha.com'),
   title: {
     default: 'DAME MARCHA — Revista de Cine y Música',
     template: '%s | DAME MARCHA',
@@ -43,7 +44,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'es_ES',
-    url: 'https://damemarcha.com',
+    url: 'https://www.damemarcha.com',
     title: 'DAME MARCHA — Revista de Cine y Música',
     description:
       'Revista cultural neo-punk. Cine y música sin filtros: próximos estrenos, crítica, análisis de álbumes y directos.',
@@ -116,6 +117,10 @@ export default function RootLayout({
         <SiteHeader articles={articles} />
         <main>{children}</main>
         <SiteFooter />
+
+        {/* 🐑 Mascota Oveja interactiva en la esquina inferior derecha */}
+        <MascotaOveja />
+
         {process.env.NODE_ENV === 'production' && (
           <>
             <Analytics />
