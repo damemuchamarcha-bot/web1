@@ -166,29 +166,3 @@ html {
   -webkit-text-stroke: 2px var(--punk-yellow);
 }
 
-/* -------- Animación Mascota Oveja Pixel-Art -------- */
-
-@keyframes ovejaPasos {
-  from { background-position: 0px 0px; }
-  to { background-position: -82px 0px; }
-}
-
-@keyframes ovejaPaseo {
-  0% { transform: translateX(-60px); }
-  100% { transform: translateX(100vw); }
-}
-
-@utility animate-oveja-caminar {
-  width: 41px;
-  height: 32px;
-  background-image: url('/oveja-caminando.png');
-  background-repeat: no-repeat;
-  background-size: 82px 96px;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  animation: ovejaPasos 0.8s steps(2) infinite;
-}
-
-@utility animate-oveja-paseo {
-  animation: ovejaPaseo 30s linear infinite;
-}
