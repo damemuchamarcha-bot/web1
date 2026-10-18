@@ -4,7 +4,6 @@ import { getFeatured, articles } from '@/lib/articles'
 import { HeroArticle } from '@/components/hero-article'
 import { ArticleCard } from '@/components/article-card'
 import { Marquee } from '@/components/marquee'
-import { MascotaPaseo } from '@/components/mascota' // <-- Importamos tu componente
 
 export default function HomePage() {
   const featured = getFeatured()
