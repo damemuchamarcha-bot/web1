@@ -69,6 +69,14 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* --- MASCOTA OVEJA PASEANDO (Solo en la Home) --- */}
+      <div className="fixed bottom-0 left-0 right-0 z-30 pointer-events-none overflow-hidden h-12">
+        <div className="animate-oveja-paseo absolute bottom-2">
+          <div className="animate-oveja-caminar" />
+        </div>
+      </div>
+      {/* ----------------------------------------------- */}
     </>
   )
 }
