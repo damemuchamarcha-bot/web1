@@ -165,3 +165,19 @@ html {
 @utility text-stroke-yellow {
   -webkit-text-stroke: 2px var(--punk-yellow);
 }
+
+/* -------- Animación Mascota Oveja Pixel-Art -------- */
+
+@keyframes ovejaCaminar {
+  from {
+    background-position: 0px 0px;
+  }
+  to {
+    background-position: -96px 0px;
+  }
+}
+
+.animate-oveja-caminar {
+  background-size: 128px 32px;
+  animation: ovejaCaminar 0.6s steps(3) infinite;
+}
