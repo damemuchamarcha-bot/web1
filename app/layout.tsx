@@ -5,7 +5,6 @@ import { Anton, Inter } from 'next/font/google'
 import Script from 'next/script'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
-import { MascotaOveja } from '@/components/mascota'
 import { articles } from '@/lib/articles'
 import './globals.css'
 
@@ -118,16 +117,7 @@ export default function RootLayout({
         <main>{children}</main>
         <SiteFooter />
 
-        {/* 🐑 Mascota Oveja interactiva en la esquina inferior derecha */}
-        <MascotaOveja />
-
-        {process.env.NODE_ENV === 'production' && (
-          <>
-            <Analytics />
-            <SpeedInsights />
-          </>
-        )}
-      </body>
-    </html>
+      
+  
   )
 }
