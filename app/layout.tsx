@@ -116,8 +116,9 @@ export default function RootLayout({
         <SiteHeader articles={articles} />
         <main>{children}</main>
         <SiteFooter />
-
-      
-  
+        <Analytics />
+        <SpeedInsights />
+      </body>
+    </html>
   )
 }
