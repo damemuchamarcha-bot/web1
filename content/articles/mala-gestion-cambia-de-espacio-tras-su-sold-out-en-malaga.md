@@ -1,7 +1,9 @@
 ---
 title: Mala Gestión en el Pop and Roll Circus tras su sold out en Málaga
 date: 2026-11-04T09:30:00.000+01:00
-excerpt: Xx
+excerpt: "El grupo valenciano Mala Gestión, cambia de espacio en su concierto en
+  Málaga, al Auditorio Cortijo de Torres. "
+keywords: "Directo, concierto, malagestion, Málaga, Auditorio Cortijo de Torres "
 author: Dame Marcha
 section: musica
 category: directos
