@@ -5,12 +5,14 @@ excerpt: Xx
 author: Dame Marcha
 section: musica
 category: directos
-image: https://3ejmd55n1g.ucarecd.net/62a85fea-dcb4-4cd9-a200-ff213dfe9b55/
+image: https://3ejmd55n1g.ucarecd.net/eb102abb-8fd4-4b62-8c60-a8d884ee71a3/-/crop/1080x463/0,176/-/preview/
 featured: false
 ---
 Tras el sold out inicial en Sala Marte, la banda de “ñunk” Mala Gestión cambia el concierto programado al Auditorio de Torres.
 
 El grupo pasara Pop and Roll circus un nuevo espacio cultural donde albergar a otros conciertos como Cupido, Haze, Miranda!
+
+<https://www.instagram.com/p/DfSvpPrqxa-/?rpxt=N3J3MDRuZG8zbGt5>
 
 Mala Gestión es una banda emergente de indie-punk y pop originaria de Valencia que se ha consolidado como una de las grandes revelaciones de la escena independiente española.
 
