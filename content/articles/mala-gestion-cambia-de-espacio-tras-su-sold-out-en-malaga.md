@@ -1,5 +1,5 @@
 ---
-title: Mala Gestión en el Pop  tras su sold out en Málaga
+title: Mala Gestión en el Pop and Roll Circus tras su sold out en Málaga
 date: 2026-11-04T09:30:00.000+01:00
 excerpt: Xx
 author: Dame Marcha
