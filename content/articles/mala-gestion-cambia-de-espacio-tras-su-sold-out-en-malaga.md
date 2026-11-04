@@ -10,7 +10,7 @@ featured: false
 ---
 Tras el sold out inicial en Sala Marte, la banda de “ñunk” Mala Gestión cambia el concierto programado al Auditorio de Torres.
 
-El grupo pasara Pop and Roll circus un nuevo espacio cultural donde albergar a otros conciertos como Cupido, Haze, Miranda!
+El grupo pasará el 13 de noviembre en al Pop and Roll circus un nuevo espacio cultural donde albergar a otros conciertos como Cupido, Haze, Miranda!
 
 <https://www.instagram.com/p/DfSvpPrqxa-/?rpxt=N3J3MDRuZG8zbGt5>
 
