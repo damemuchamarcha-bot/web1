@@ -18,8 +18,10 @@ Mala Gestión es una banda emergente de indie-punk y pop originaria de Valencia 
 
 Autodefinidos bajo el concepto de "ñunk" una fusión de pop, punk-rock costumbrista y pinceladas de electrónica, el grupo destaca por sus letras ácidas, satíricas y cargadas de ironía generacional. Sus canciones abordan con humor y frustración la vida cotidiana de los jóvenes actuales, con títulos tan virales como Dios me tiró un *Ducados rubio, Ayer vino Messi* o *Sandalias del PSOE.*
 
-La banda cuenta con un primer álbum de estudio titulado Se nos ha complicado y actualmente se encuentra en plena promoción de su segundo trabajo discográfico, Hacemos lo que podemos.
+<https://www.instagram.com/reel/DeWrFXhOLBl/?psln=MWYzZ3JjYnFmY3d3MQ==>
+
+La banda cuenta con un primer álbum de estudio titulado Se nos ha complicado y actualmente se encuentra en plena promoción de su segundo trabajo discográfico, ***Hacemos lo que podemos***.
 
 La respuesta del público a este lanzamiento ha sido masiva a través de su gira nacional **Hacemos lo que podemos Tour**. El éxito de convocatoria de la banda se ha hecho evidente en ciudades como Málaga, donde la altísima demanda de entradas obligó a trasladar su concierto programado originalmente en una sala convencional al nuevo recinto de gran formato Pop y Roll Circus, ubicado en el Auditorio Municipal Cortijo de Torres. 
 
-Puedes comprar las entradas al evento en este enlace
+Puedes comprar las entradas al evento en este enlace <https://entradas.crashmusic.es/event/concierto-mala-gestion-malaga-sala-circus-viernes-13-de-noviembre>
