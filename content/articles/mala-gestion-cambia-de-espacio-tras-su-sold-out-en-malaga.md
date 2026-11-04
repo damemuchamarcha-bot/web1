@@ -20,4 +20,6 @@ Autodefinidos bajo el concepto de "ñunk" una fusión de pop, punk-rock costumbr
 
 La banda cuenta con un primer álbum de estudio titulado Se nos ha complicado y actualmente se encuentra en plena promoción de su segundo trabajo discográfico, Hacemos lo que podemos.
 
-La respuesta del público a este lanzamiento ha sido masiva a través de su gira nacional **Hacemos lo que podemos Tour**. El éxito de convocatoria de la banda se ha hecho evidente en ciudades como Málaga, donde la altísima demanda de entradas obligó a trasladar su concierto programado originalmente en una sala convencional al nuevo recinto de gran formato Pop y Roll Circus, ubicado en el Auditorio Municipal Cortijo de Torres
+La respuesta del público a este lanzamiento ha sido masiva a través de su gira nacional **Hacemos lo que podemos Tour**. El éxito de convocatoria de la banda se ha hecho evidente en ciudades como Málaga, donde la altísima demanda de entradas obligó a trasladar su concierto programado originalmente en una sala convencional al nuevo recinto de gran formato Pop y Roll Circus, ubicado en el Auditorio Municipal Cortijo de Torres. 
+
+Puedes comprar las entradas al evento en este enlace
