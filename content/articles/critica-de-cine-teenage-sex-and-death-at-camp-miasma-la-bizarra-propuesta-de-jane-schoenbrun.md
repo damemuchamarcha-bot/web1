@@ -27,7 +27,7 @@ En un contexto en el que la nostalgia dictamina la temática y el rumbo estétic
 
 Sin un rumbo claro y llena de dudas e inseguridades, Kris conoce a Billy Presley **(Gillian Anderson)**, la actriz protagonista del largometraje original, en quien encontrará un punto de inflexión para el desarrollo de su personaje. Obsesionada con la expresividad de sus ojos y con la emotividad que proyecta en pantalla, Kris apuesta por la actriz retirada y va adentrándose en su mundo para conocer más sobre ella.
 
-![]()
+![](https://3ejmd55n1g.ucarecd.net/72d372cd-b430-4b20-b960-0802859d98a4/-/crop/1200x515/0,39/-/preview/)
 
 La trama principal se centra en la lucha contra **Little Death**, un “monstruo” que ataca y mata a los visitantes como venganza por el rechazo hacia su persona. Tal y como señala la protagonista, se establece una conexión entre lo queer y la monstruosidad, creando una nueva línea artística y reflexiva dentro del género.
 
