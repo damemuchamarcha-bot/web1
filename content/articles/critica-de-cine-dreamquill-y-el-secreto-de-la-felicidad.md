@@ -1,7 +1,7 @@
 ---
 title: 'Crítica de cine: Dreamquill y el "secreto de la felicidad"'
 date: 2026-11-17T19:20:00.000+01:00
-excerpt: Esta no tan distópica obra obras reconoce la importancia de la humanidad
+excerpt: Esta no tan distópica obra obras reconoce la importancia de la humanidad.
 meta_description: Alex Prager debuta en el cine con una película de ciencia
   ficción sobre los peligros de la inteligencia artificial. Elizabeth Banks
   protagoniza esta distopía sobre identidad, tecnología y sustitución humana.
