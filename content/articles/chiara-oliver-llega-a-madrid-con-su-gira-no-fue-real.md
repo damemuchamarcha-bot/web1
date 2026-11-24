@@ -27,4 +27,4 @@ La producción principal del proyecto está llevada a cabo por Daniel Sabater (a
 
 Aunque está cerca de colgar el cartel de **SOLD OUT**, todavía quedan algunas **[entradas disponibles](https://chiaraoliveroficial.com/pages/27-de-noviembre-2026-madrid-palacio-vistalegre)**. 
 
-![](https://3ejmd55n1g.ucarecd.net/12af30b8-52e7-46fc-ac49-07ae44b86725/-/crop/1022x742/0,0/-/preview/)
+![](https://3ejmd55n1g.ucarecd.net/0df75493-bcb6-45b2-9dc1-4d21c5cbcf8b/-/crop/1022x494/0,0/-/preview/)
